@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="grants.html" class="nav-item">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfo"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='grants.html'">
+                        + New Application
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Applications</div>
+                        <div class="stat-value" id="totalApplications">0</div>
+                        <div class="stat-change positive">+3 this month</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Awarded</div>
+                        <div class="stat-value" id="awardedCount">0</div>
+                        <div class="stat-change positive">+1 this month</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Funding Won</div>
+                        <div class="stat-value" id="totalFunding">$0</div>
+                        <div class="stat-change positive">+$50K this month</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Success Rate</div>
+                        <div class="stat-value" id="successRate">0%</div>
+                        <div class="stat-change positive">Above average</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Applications -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Applications</h2>
+                    <a href="applications.html" class="link">View All →</a>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Grant Name</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Deadline</th>
+                                <th>Assigned To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentApplications">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    No applications yet. <a href="grants.html">Browse grants</a> to get started.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Upcoming Deadlines -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Upcoming Deadlines</h2>
+                </div>
+                <div class="deadline-list" id="upcomingDeadlines">
+                    <div class="empty-state">No upcoming deadlines</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <button class="action-card" onclick="window.location.href='grants.html'">
+                        <span class="action-icon">🔍</span>
+                        <span class="action-label">Find Grants</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='applications.html'">
+                        <span class="action-icon">📝</span>
+                        <span class="action-label">Track Applications</span>
+                    </button>
+                    <button class="action-card" onclick="window.location.href='reports.html'">
+                        <span class="action-icon">📊</span>
+                        <span class="action-label">View Reports</span>
+                    </button>
+                    <button class="action-card" onclick="exportData()">
+                        <span class="action-icon">📥</span>
+                        <span class="action-label">Export Data</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Check authentication
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        // Display user info
+        document.getElementById('userInfo').innerHTML = `
+            <div class="user-avatar">${currentUser.fullName.charAt(0)}</div>
+            <div class="user-details">
+                <div class="user-name">${currentUser.fullName}</div>
+                <div class="user-email">${currentUser.email}</div>
+                <div class="user-plan">${currentUser.plan} Plan</div>
+            </div>
+        `;
+
+        // Load dashboard data
+        function loadDashboard() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const userApplications = applications.filter(app => app.userId === currentUser.email);
+
+            // Update stats
+            document.getElementById('totalApplications').textContent = userApplications.length;
+            
+            const awarded = userApplications.filter(app => app.status === 'awarded');
+            document.getElementById('awardedCount').textContent = awarded.length;
+            
+            const totalFunding = awarded.reduce((sum, app) => sum + (app.awardAmount || 0), 0);
+            document.getElementById('totalFunding').textContent = '$' + totalFunding.toLocaleString();
+            
+            const successRate = userApplications.length > 0 
+                ? Math.round((awarded.length / userApplications.length) * 100) 
+                : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+
+            // Load recent applications
+            loadRecentApplications(userApplications);
+            loadUpcomingDeadlines(userApplications);
+        }
+
+        function loadRecentApplications(applications) {
+            const tbody = document.getElementById('recentApplications');
+            
+            if (applications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            No applications yet. <a href="grants.html">Browse grants</a> to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const recent = applications.slice(0, 5);
+            tbody.innerHTML = recent.map(app => `
+                <tr>
+                    <td><strong>${app.grantName}</strong></td>
+                    <td>$${app.amount.toLocaleString()}</td>
+                    <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                    <td>${new Date(app.deadline).toLocaleDateString()}</td>
+                    <td>${app.assignedTo || 'Unassigned'}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="viewApplication('${app.id}')">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadUpcomingDeadlines(applications) {
+            const container = document.getElementById('upcomingDeadlines');
+            const upcoming = applications
+                .filter(app => new Date(app.deadline) > new Date() && app.status !== 'awarded')
+                .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+                .slice(0, 5);
+
+            if (upcoming.length === 0) {
+                container.innerHTML = '<div class="empty-state">No upcoming deadlines</div>';

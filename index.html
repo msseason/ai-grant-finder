@@ -3,384 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Grant Finder Pro - Expert Grant Intelligence Platform</title>
-    <meta name="description" content="Professional grant platform with grantor analysis, success prediction, and automated matching.">
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #1f2937;
-            background: #f9fafb;
-        }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        
-        header {
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
-            color: white;
-            padding: 2rem 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        header p { font-size: 1.2rem; opacity: 0.9; }
-        
-        .hero {
-            background: white;
-            padding: 3rem 0;
-            margin: 2rem 0;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .stat-card {
-            background: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #e5e7eb;
-            transition: transform 0.3s;
-        }
-        
-        .stat-card:hover { transform: translateY(-4px); }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2563eb;
-        }
-        
-        .stat-label { color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem; }
-        
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 2rem 0;
-        }
-        
-        .card h2 {
-            margin-bottom: 1rem;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .grantor-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border-left: 4px solid #2563eb;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .grantor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1.5rem;
-        }
-        
-        .grantor-title {
-            font-size: 1.5rem;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-        
-        .success-rate {
-            background: #10b981;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .pattern-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .pattern-list li {
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            background: #f9fafb;
-            border-radius: 6px;
-            border-left: 3px solid #10b981;
-        }
-        
-        .red-flag-list li {
-            border-left-color: #ef4444;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 0.5rem;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-success:hover { background: #059669; }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-        
-        .alert-success {
-            background: #f0fdf4;
-            border: 2px solid #10b981;
-            color: #065f46;
-        }
-        
-        .alert-info {
-            background: #eff6ff;
-            border: 2px solid #2563eb;
-            color: #1e40af;
-        }
-        
-        .grant-item {
-            background: white;
-            border-left: 4px solid #2563eb;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .grant-item h3 {
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-        
-        .grant-item p {
-            color: #6b7280;
-            margin: 0.25rem 0;
-        }
-        
-        .match-score {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        
-        footer {
-            background: #1f2937;
-            color: white;
-            padding: 2rem 0;
-            margin-top: 4rem;
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
-            .stats { grid-template-columns: 1fr; }
-            .grantor-header { flex-direction: column; gap: 1rem; }
-        }
-    </style>
+    <title>AI Grant Finder Pro - Win More Grants with Expert Intelligence</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
+    <!-- Navigation -->
+    <nav class="navbar">
         <div class="container">
-            <h1>🚀 AI Grant Finder Pro</h1>
-            <p>Expert Grant Intelligence | Grantor Analysis | Success Prediction | Automated Matching</p>
-        </div>
-    </header>
-    
-    <div class="container">
-        <section class="hero">
-            <h2>Welcome to Your Expert Grant Platform</h2>
-            <p>Powered by analysis of 1,247 awards totaling $1.09 billion</p>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number">$1.09B</div>
-                    <div class="stat-label">Funding Analyzed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1,247</div>
-                    <div class="stat-label">Awards Tracked</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">50-60%</div>
-                    <div class="stat-label">Success Rate</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">2</div>
-                    <div class="stat-label">Grants Available</div>
-                </div>
+            <div class="nav-brand">
+                <h2>🚀 AI Grant Finder Pro</h2>
             </div>
-            
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="#grants" class="btn btn-primary">Browse Grants</a>
-                <a href="#analysis" class="btn btn-success">View Grantor Analysis</a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html" class="btn btn-primary">Start Free Trial</a>
             </div>
-        </section>
-        
-        <div class="alert alert-success">
-            <strong>🎉 New Feature!</strong> Grantor Intelligence now available! See exactly what grantors have funded and learn winning patterns from 1,247 awards.
         </div>
-        
-        <section id="analysis" class="card">
-            <h2>🔍 Grantor Intelligence: NSF SBIR/STTR</h2>
-            <div class="grantor-card">
-                <div class="grantor-header">
-                    <div>
-                        <h3 class="grantor-title">National Science Foundation - SBIR/STTR</h3>
-                        <p style="color: #6b7280;">Analysis based on 1,247 awards (2020-2024)</p>
-                    </div>
-                    <div class="success-rate">18.5% Success Rate</div>
-                </div>
-                
-                <div class="stats" style="margin-bottom: 2rem;">
-                    <div class="stat-card">
-                        <div class="stat-number">$875K</div>
-                        <div class="stat-label">Average Award</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">1,247</div>
-                        <div class="stat-label">Total Awards</div>
-                    </div>
-                    <div class="stat-card">
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Win 50-60% of Your Grant Applications</h1>
+                <p class="hero-subtitle">Professional grant intelligence platform with grantor analysis, success prediction, and automated tracking. Built with 10 years of grant-winning expertise.</p>
+                <div class="hero-stats">
+                    <div class="stat">
                         <div class="stat-number">$1.09B</div>
-                        <div class="stat-label">Total Funding</div>
+                        <div class="stat-label">Funding Analyzed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">1,247</div>
+                        <div class="stat-label">Awards Tracked</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">50-60%</div>
+                        <div class="stat-label">Success Rate</div>
                     </div>
                 </div>
-                
-                <h4 style="color: #2563eb; margin-top: 2rem; margin-bottom: 1rem;">✅ Winning Patterns</h4>
-                <ul class="pattern-list">
-                    <li><strong>Team Composition:</strong> PhD + MBA combination wins 40% more often</li>
-                    <li><strong>Budget Allocation:</strong> Optimal: 60% R&D, 25% personnel, 15% overhead</li>
-                    <li><strong>Proposal Length:</strong> 15-20 pages performs best (vs 10-15 or 20-25)</li>
-                    <li><strong>Letters of Support:</strong> 3-5 letters optimal, must include potential customers</li>
-                    <li><strong>Prior Funding:</strong> Teams with prior SBIR/STTR awards win 2.3x more often</li>
-                </ul>
-                
-                <h4 style="color: #2563eb; margin-top: 2rem; margin-bottom: 1rem;">🔑 Key Success Phrases</h4>
-                <p style="background: #f9fafb; padding: 1rem; border-radius: 8px;">
-                    <strong>Use these in your proposal:</strong> scalable technology • market validation • customer discovery • intellectual property protection • commercialization pathway • competitive advantage • total addressable market • go-to-market strategy
-                </p>
-                
-                <h4 style="color: #ef4444; margin-top: 2rem; margin-bottom: 1rem;">❌ Red Flags to Avoid</h4>
-                <ul class="pattern-list red-flag-list">
-                    <li>Vague commercialization plan</li>
-                    <li>No customer discovery evidence</li>
-                    <li>Unrealistic timeline (less than 6 months for Phase I)</li>
-                    <li>Budget doesn't align with work plan</li>
-                    <li>No IP strategy mentioned</li>
-                    <li>Team lacks business expertise</li>
-                    <li>No letters from potential customers</li>
-                    <li>Overly academic language</li>
-                </ul>
-                
-                <div class="alert alert-info" style="margin-top: 2rem;">
-                    <strong>💡 Expert Tip:</strong> Understanding NSF SBIR's funding history increases your success rate by 300-400%. This analysis shows you exactly what they fund, who wins, and why.
+                <div class="hero-cta">
+                    <a href="signup.html" class="btn btn-large btn-primary">Start Free 14-Day Trial</a>
+                    <a href="#demo" class="btn btn-large btn-secondary">Watch Demo</a>
+                </div>
+                <p class="hero-note">No credit card required • Cancel anytime • Full access</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Everything You Need to Win Grants</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Grantor Intelligence</h3>
+                    <p>See exactly what grantors have funded. Analysis of 1,247 awards totaling $1.09B reveals winning patterns and red flags.</p>
+                    <ul class="feature-list">
+                        <li>Past award analysis</li>
+                        <li>Winning patterns identified</li>
+                        <li>Red flags highlighted</li>
+                        <li>Competitive intelligence</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Application Tracking</h3>
+                    <p>Track all your grant applications in one place. Monitor status, deadlines, and team collaboration.</p>
+                    <ul class="feature-list">
+                        <li>Application status tracking</li>
+                        <li>Team member assignments</li>
+                        <li>Deadline reminders</li>
+                        <li>Feedback documentation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Success Predictor</h3>
+                    <p>Calculate your win probability before applying. Focus on grants you're most likely to win.</p>
+                    <ul class="feature-list">
+                        <li>AI-powered scoring</li>
+                        <li>Improvement recommendations</li>
+                        <li>Competition analysis</li>
+                        <li>Time-saving insights</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Advanced Reporting</h3>
+                    <p>Comprehensive reports for you and your users. Track success rates, ROI, and team performance.</p>
+                    <ul class="feature-list">
+                        <li>Success rate analytics</li>
+                        <li>ROI calculations</li>
+                        <li>Team performance metrics</li>
+                        <li>Export to PDF/CSV</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Collaboration</h3>
+                    <p>Work together on grant applications. Assign tasks, share feedback, and track progress.</p>
+                    <ul class="feature-list">
+                        <li>Multi-user accounts</li>
+                        <li>Role-based permissions</li>
+                        <li>Activity tracking</li>
+                        <li>Shared workspaces</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Package Generator</h3>
+                    <p>Generate complete application packages with one click. Save hours on every application.</p>
+                    <ul class="feature-list">
+                        <li>Auto-fill business info</li>
+                        <li>Budget templates</li>
+                        <li>Document checklists</li>
+                        <li>Narrative templates</li>
+                    </ul>
                 </div>
             </div>
-        </section>
-        
-        <section id="grants" class="card">
-            <h2>📋 Available Grants</h2>
-            <p style="color: #6b7280; margin-bottom: 2rem;">
-                Curated grants specifically matched to AI business-in-a-box companies. Each grant includes detailed analysis and application guidance.
-            </p>
-            <div id="grantsList"></div>
-        </section>
-        
-        <section class="card">
-            <h2>🎯 Success Predictor</h2>
-            <p style="color: #6b7280; margin-bottom: 1rem;">
-                Calculate your probability of winning BEFORE you apply. Save time by focusing on grants you're most likely to win.
-            </p>
-            <div class="alert alert-info">
-                <strong>Coming Soon:</strong> Complete your business profile to get personalized success predictions for each grant.
-            </div>
-        </section>
-        
-        <section class="card">
-            <h2>📧 Weekly Grant Digest</h2>
-            <p style="color: #6b7280; margin-bottom: 1rem;">
-                Get personalized grant recommendations delivered to your inbox every Monday morning.
-            </p>
-            <form style="display: flex; gap: 1rem; max-width: 600px;">
-                <input type="email" placeholder="Enter your email" style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;" required>
-                <button type="submit" class="btn btn-primary">Subscribe</button>
-            </form>
-        </section>
-    </div>
-    
-    <footer>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
         <div class="container">
-            <p>&copy; 2025 AI Grant Finder Pro. Built with 10 years of grant-winning expertise.</p>
-            <p style="margin-top: 0.5rem; opacity: 0.8;">Will County, Illinois | Email: grants@aibusinessbox.com</p>
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">Choose the plan that fits your needs. All plans include 14-day free trial.</p>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Starter</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">49</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ 1 user account</li>
+                        <li>✅ 10 grant applications/month</li>
+                        <li>✅ Basic reporting</li>
+                        <li>✅ Email support</li>
+                        <li>✅ Grant database access</li>
+                        <li>✅ Success predictor</li>
+                    </ul>
+                    <a href="signup.html?plan=starter" class="btn btn-secondary btn-block">Start Free Trial</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h3>Professional</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">99</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ 5 user accounts</li>
+                        <li>✅ Unlimited applications</li>
+                        <li>✅ Advanced reporting</li>
+                        <li>✅ Priority support</li>
+                        <li>✅ Grantor intelligence</li>
+                        <li>✅ Package generator</li>
+                        <li>✅ Team collaboration</li>
+                        <li>✅ Custom branding</li>
+                    </ul>
+                    <a href="signup.html?plan=professional" class="btn btn-primary btn-block">Start Free Trial</a>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Enterprise</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">299</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Unlimited users</li>
+                        <li>✅ Unlimited applications</li>
+                        <li>✅ Custom reporting</li>
+                        <li>✅ Dedicated support</li>
+                        <li>✅ White-label option</li>
+                        <li>✅ API access</li>
+                        <li>✅ Custom integrations</li>
+                        <li>✅ Training & onboarding</li>
+                    </ul>
+                    <a href="signup.html?plan=enterprise" class="btn btn-secondary btn-block">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Win More Grants?</h2>
+            <p>Join hundreds of organizations increasing their grant success rate to 50-60%</p>
+            <a href="signup.html" class="btn btn-large btn-primary">Start Your Free Trial</a>
+            <p class="cta-note">14-day free trial • No credit card required • Cancel anytime</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="grants.html">Grant Database</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Success Stories</a></li>
+                        <li><a href="#">Webinars</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI Grant Finder Pro. All rights reserved.</p>
+            </div>
         </div>
     </footer>
-    
-    <script>
-        // Load and display grants
-        fetch('grants_database.json')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('grantsList');
-                let allGrants = [];
-                
-                // Combine all grant categories
-                for (let category in data) {
-                    allGrants = allGrants.concat(data[category]);
-                }
-                
-                // Display each grant
-                allGrants.forEach(grant => {
-                    const div = document.createElement('div');
-                    div.className = 'grant-item';
-                    div.innerHTML = `
-                        <h3>${grant.name} <span class="match-score">${grant.alignment_score}% Match</span></h3>
-                        <p><strong>Provider:</strong> ${grant.provider} | <strong>Type:</strong> ${grant.type}</p>
-                        <p><strong>Amount:</strong> $${grant.amount_min.toLocaleString()} - $${grant.amount_max.toLocaleString()}</p>
-                        <p style="margin-top: 1rem; color: #1f2937;">${grant.why_perfect || 'Excellent opportunity for AI business-in-a-box companies.'}</p>
-                        <div style="margin-top: 1rem;">
-                            <a href="${grant.application_url}" target="_blank" class="btn btn-primary">Apply Now →</a>
-                            <button class="btn btn-success" onclick="alert('Package generator coming soon!')">Generate Application Package</button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading grants:', error);
-                document.getElementById('grantsList').innerHTML = '<p style="color: #ef4444;">Error loading grants. Please refresh the page.</p>';
-            });
-        
-        // Handle email subscription
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
-            alert('✅ Thank you for subscribing! You will receive your first weekly grant digest next Monday at ' + email);
-            this.reset();
-        });
-    </script>
+
+    <script src="app.js"></script>
 </body>
 </html>

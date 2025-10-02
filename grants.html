@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Grants - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="grants.html" class="nav-item active">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Browse Grants</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportGrants()">
+                        📥 Export List
+                    </button>
+                </div>
+            </header>
+
+            <!-- Search and Filters -->
+            <div class="card">
+                <div class="search-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <input type="text" id="searchInput" placeholder="Search grants by name, provider, or keyword..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem;">
+                    <button class="btn btn-primary" onclick="searchGrants()">Search</button>
+                </div>
+
+                <div class="filters-bar">
+                    <select id="typeFilter" onchange="filterGrants()">
+                        <option value="all">All Types</option>
+                        <option value="Federal">Federal</option>
+                        <option value="State">State</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Local">Local</option>
+                    </select>
+
+                    <select id="amountFilter" onchange="filterGrants()">
+                        <option value="all">All Amounts</option>
+                        <option value="small">Under $50K</option>
+                        <option value="medium">$50K - $500K</option>
+                        <option value="large">Over $500K</option>
+                    </select>
+
+                    <select id="matchFilter" onchange="filterGrants()">
+                        <option value="all">All Grants</option>
+                        <option value="perfect">Perfect Matches (85%+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grants Grid -->
+            <div id="grantsContainer" class="grants-grid"></div>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        let allGrants = [];
+
+        async function loadGrants() {
+            allGrants = await Database.grants.getAll();
+            displayGrants(allGrants);
+        }
+
+        function displayGrants(grants) {
+            const container = document.getElementById('grantsContainer');
+            
+            if (grants.length === 0) {
+                container.innerHTML = '<div class="empty-state">No grants found matching your criteria.</div>';
+                return;
+            }
+
+            container.innerHTML = grants.map(grant => `
+                <div class="card" style="border-left: 4px solid ${grant.perfect_for_your_business ? 'var(--success)' : 'var(--primary)'};">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem;">${grant.name}</h3>
+                            <p style="color: var(--gray-600); font-size: 0.9rem;">${grant.provider}</p>
+                        </div>
+                        <div>
+                            ${grant.perfect_for_your_business ? '<span class="status-badge status-awarded">✨ Perfect Match</span>' : ''}
+                            <span class="status-badge status-in-progress">${grant.type}</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">
+                        $${grant.amount_min.toLocaleString()} - $${grant.amount_max.toLocaleString()}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                        <div>
+                            <span style="color: var(--gray-600);">📅 Deadline:</span>
+                            <strong>${grant.deadline}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-600);">🎯 Match Score:</span>
+                            <strong>${grant.alignment_score || 'N/A'}%</strong>
+                        </div>
+                    </div>
+
+                    ${grant.why_perfect ? `
+                        <div style="background: #f0fdf4; border-left: 3px solid var(--success); padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+                            <strong style="color: var(--success);">💡 Why This is Perfect:</strong> ${grant.why_perfect}
+                        </div>
+                    ` : ''}
+
+                    ${grant.utilization ? `
+                        <div style="margin: 1rem 0;">
+                            <h4 style="margin-bottom: 0.5rem;">How to Use This Grant:</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                ${grant.utilization.map(item => `
+                                    <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                                        <span style="position: absolute; left: 0; color: var(--success); font-weight: bold;">✓</span>
+                                        ${item}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <a href="${grant.application_url}" target="_blank" class="btn btn-primary">Apply Now →</a>
+                        <button class="btn btn-success" onclick="addToApplications('${grant.id}')">+ Add to My Applications</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchGrants() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allGrants.filter(grant => 
+                grant.name.toLowerCase().includes(searchTerm) ||
+                grant.provider.toLowerCase().includes(searchTerm) ||
+                grant.category.some(cat => cat.toLowerCase().includes(searchTerm))
+            );
+            displayGrants(filtered);
+        }
+
+        function filterGrants() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const amountFilter = document.getElementById('amountFilter').value;
+            const matchFilter = document.getElementById('matchFilter').value;
+
+            let filtered = allGrants;
+
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(g => g.type === typeFilter);
+            }
+
+            if (amountFilter !== 'all') {
+                filtered = filtered.filter(g => {
+                    if (amountFilter === 'small') return g.amount_max < 50000;
+                    if (amountFilter === 'medium') return g.amount_max >= 50000 && g.amount_max <= 500000;
+                    if (amountFilter === 'large') return g.amount_max > 500000;
+                });
+            }
+
+            if (matchFilter === 'perfect') {
+                filtered = filtered.filter(g => g.alignment_score >= 85);
+            }
+
+            displayGrants(filtered);
+        }
+
+        async function addToApplications(grantId) {
+            const grant = allGrants.find(g => g.id === grantId);
+            if (!grant) return;
+
+            const appData = {
+                userId: currentUser.email,
+                grantName: grant.name,
+                provider: grant.provider,
+                amount: grant.amount_max,
+                status: 'draft',
+                deadline: grant.next_deadline || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                assignedTo: currentUser.fullName,
+                notes: 'Added from grant database'
+            };
+
+            Database.applications.create(appData);
+            
+            if (confirm('✅ Grant added to your applications! Would you like to view it now?')) {
+                window.location.href = 'applications.html';
+            }
+        }
+
+        function exportGrants() {
+            const csv = convertArrayToCSV(allGrants.map(g => ({
+                'Grant Name': g.name,
+                'Provider': g.provider,
+                'Type': g.type,
+                'Min Amount': g.amount_min,
+                'Max Amount': g.amount_max,
+                'Deadline': g.deadline,
+                'Match Score': g.alignment_score + '%',
+                'Application URL': g.application_url
+            })));
+            
+            downloadFile(csv, 'grants-list-' + new Date().toISOString().split('T')[0] + '.csv', 'text/csv');
+        }
+
+        function convertArrayToCSV(data) {
+            if (data.length === 0) return '';
+            const headers = Object.keys(data[0]);
+            const rows = data.map(obj => headers.map(header => obj[header] || ''));
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        loadGrants();
+    </script>
+</body>
+</html>

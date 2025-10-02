@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>🚀 AI Grant Finder Pro</h1>
+                <h2>Welcome Back</h2>
+                <p>Log in to access your grant dashboard</p>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required placeholder="john@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+
+                <div class="form-group checkbox">
+                    <label>
+                        <input type="checkbox" id="remember">
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                    Log In
+                </button>
+
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="signup.html">Start free trial</a></p>
+                </div>
+            </form>
+
+            <!-- Demo Credentials -->
+            <div class="demo-credentials">
+                <h4>Demo Credentials:</h4>
+                <p><strong>Email:</strong> demo@grantfinder.com</p>
+                <p><strong>Password:</strong> demo1234</p>
+                <button onclick="fillDemoCredentials()" class="btn btn-secondary btn-small">Use Demo Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Create demo account if it doesn't exist
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (!users.find(u => u.email === 'demo@grantfinder.com')) {
+            users.push({
+                fullName: 'Demo User',
+                email: 'demo@grantfinder.com',
+                password: 'demo1234',
+                companyName: 'Demo Company',
+                plan: 'professional',
+                role: 'owner',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'demo@grantfinder.com';
+            document.getElementById('password').value = 'demo1234';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Check if admin
+                if (user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                alert('❌ Invalid email or password. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

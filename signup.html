@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>🚀 AI Grant Finder Pro</h1>
+                <h2>Start Your Free 14-Day Trial</h2>
+                <p>No credit card required • Full access • Cancel anytime</p>
+            </div>
+
+            <form id="signupForm" class="auth-form">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="fullName" required placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="email" required placeholder="john@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="password" required placeholder="Minimum 8 characters">
+                    <small>Must be at least 8 characters with 1 number</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Company/Organization Name *</label>
+                    <input type="text" id="companyName" required placeholder="Your Company LLC">
+                </div>
+
+                <div class="form-group">
+                    <label>Select Plan *</label>
+                    <select id="plan" required>
+                        <option value="">Choose a plan...</option>
+                        <option value="starter">Starter - $49/month</option>
+                        <option value="professional" selected>Professional - $99/month (Most Popular)</option>
+                        <option value="enterprise">Enterprise - $299/month</option>
+                    </select>
+                </div>
+
+                <div class="form-group checkbox">
+                    <label>
+                        <input type="checkbox" id="terms" required>
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-large">
+                    Start Free Trial
+                </button>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html">Log in</a></p>
+                </div>
+            </form>
+
+            <div class="auth-benefits">
+                <h3>What you get with your trial:</h3>
+                <ul>
+                    <li>✅ Full access to all features</li>
+                    <li>✅ Grantor intelligence database</li>
+                    <li>✅ Unlimited grant searches</li>
+                    <li>✅ Application tracking</li>
+                    <li>✅ Team collaboration tools</li>
+                    <li>✅ Priority email support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                companyName: document.getElementById('companyName').value,
+                plan: document.getElementById('plan').value,
+                trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                createdAt: new Date().toISOString(),
+                role: 'owner',
+                status: 'trial'
+            };
+
+            // Save to localStorage (in production, this would be a database)
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Check if email already exists
+            if (users.find(u => u.email === userData.email)) {
+                alert('Email already registered. Please log in.');
+                return;
+            }
+
+            users.push(userData);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+
+            // Show success message
+            alert('✅ Account created successfully! Welcome to AI Grant Finder Pro.');
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        });
+
+        // Pre-select plan from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const planParam = urlParams.get('plan');
+        if (planParam) {
+            document.getElementById('plan').value = planParam;
+        }
+    </script>
+</body>
+</html>

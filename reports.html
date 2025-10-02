@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="grants.html" class="nav-item">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item active">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Reports & Analytics</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportReport('pdf')">
+                        📄 Export PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReport('csv')">
+                        📊 Export CSV
+                    </button>
+                </div>
+            </header>
+
+            <!-- Date Range Filter -->
+            <div class="filters-bar">
+                <div class="form-group">
+                    <label>Date Range:</label>
+                    <select id="dateRange" onchange="updateReports()">
+                        <option value="all">All Time</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div id="customDateRange" style="display: none;">
+                    <input type="date" id="startDate">
+                    <input type="date" id="endDate">
+                    <button class="btn btn-small" onclick="applyCustomRange()">Apply</button>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Applications Submitted</div>
+                        <div class="stat-value" id="reportTotalApps">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Grants Awarded</div>
+                        <div class="stat-value" id="reportAwarded">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Funding Won</div>
+                        <div class="stat-value" id="reportFunding">$0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Success Rate</div>
+                        <div class="stat-value" id="reportSuccessRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Breakdown -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Application Status Breakdown</h2>
+                </div>
+                <div class="status-breakdown" id="statusBreakdown"></div>
+            </div>
+
+            <!-- Timeline Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Application Timeline</h2>
+                </div>
+                <div class="timeline-chart" id="timelineChart"></div>
+            </div>
+
+            <!-- Detailed Report Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Detailed Application Report</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Grant Name</th>
+                                <th>Provider</th>
+                                <th>Amount Requested</th>
+                                <th>Status</th>
+                                <th>Submitted Date</th>
+                                <th>Deadline</th>
+                                <th>Assigned To</th>
+                                <th>Award Amount</th>
+                                <th>ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTable">
+                            <tr>
+                                <td colspan="9" class="empty-state">Loading report...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Team Performance (if multiple users) -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Team Performance</h2>
+                </div>
+                <div class="team-performance" id="teamPerformance">
+                    <div class="empty-state">No team data available</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        function updateReports() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const userApplications = applications.filter(app => app.userId === currentUser.email);
+
+            // Apply date filter
+            const dateRange = document.getElementById('dateRange').value;
+            let filtered = filterByDateRange(userApplications, dateRange);
+
+            // Update summary stats
+            document.getElementById('reportTotalApps').textContent = filtered.length;
+            
+            const awarded = filtered.filter(app => app.status === 'awarded');
+            document.getElementById('reportAwarded').textContent = awarded.length;
+            
+            const totalFunding = awarded.reduce((sum, app) => sum + (app.awardAmount || 0), 0);
+            document.getElementById('reportFunding').textContent = '$' + totalFunding.toLocaleString();
+            
+            const successRate = filtered.length > 0 ? (awarded.length / filtered.length * 100).toFixed(1) : 0;
+            document.getElementById('reportSuccessRate').textContent = successRate + '%';
+
+            // Update charts and tables
+            updateStatusBreakdown(filtered);
+            updateTimelineChart(filtered);
+            updateReportTable(filtered);
+            updateTeamPerformance(filtered);
+        }
+
+        function filterByDateRange(applications, range) {
+            const now = new Date();
+            let startDate;
+
+            switch(range) {
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'quarter':
+                    const quarter = Math.floor(now.getMonth() / 3);
+                    startDate = new Date(now.getFullYear(), quarter * 3, 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    return applications;
+            }
+
+            return applications.filter(app => new Date(app.createdAt) >= startDate);
+        }
+
+        function updateStatusBreakdown(applications) {
+            const statuses = {};
+            applications.forEach(app => {
+                statuses[app.status] = (statuses[app.status] || 0) + 1;
+            });
+
+            const container = document.getElementById('statusBreakdown');
+            const total = applications.length;
+
+            container.innerHTML = Object.entries(statuses).map(([status, count]) => {
+                const percentage = ((count / total) * 100).toFixed(1);
+                return `
+                    <div class="status-bar">
+                        <div class="status-label">
+                            <span class="status-badge status-${status}">${status}</span>
+                            <span>${count} (${percentage}%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateTimelineChart(applications) {
+            // Group by month
+            const byMonth = {};
+            applications.forEach(app => {
+                const month = new Date(app.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                byMonth[month] = (byMonth[month] || 0) + 1;
+            });
+
+            const container = document.getElementById('timelineChart');
+            const maxCount = Math.max(...Object.values(byMonth));
+
+            container.innerHTML = Object.entries(byMonth).map(([month, count]) => {
+                const height = (count / maxCount) * 100;
+                return `
+                    <div class="timeline-bar">
+                        <div class="bar" style="height: ${height}%"></div>
+                        <div class="bar-label">${month}</div>
+                        <div class="bar-value">${count}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateReportTable(applications) {
+            const tbody = document.getElementById('reportTable');
+
+            if (applications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No applications in selected date range</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = applications.map(app => {
+                const roi = app.awardAmount ? ((app.awardAmount / app.amount) * 100).toFixed(0) + '%' : '-';
+                return `
+                    <tr>
+                        <td><strong>${app.grantName}</strong></td>
+                        <td>${app.provider}</td>
+                        <td>$${app.amount.toLocaleString()}</td>
+                        <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                        <td>${app.submittedDate ? new Date(app.submittedDate).toLocaleDateString() : '-'}</td>
+                        <td>${new Date(app.deadline).toLocaleDateString()}</td>
+                        <td>${app.assignedTo || '-'}</td>
+                        <td>${app.awardAmount ? '$' + app.awardAmount.toLocaleString() : '-'}</td>
+                        <td>${roi}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateTeamPerformance(applications) {
+            const byAssignee = {};
+            applications.forEach(app => {
+                const assignee = app.assignedTo || 'Unassigned';
+                if (!byAssignee[assignee]) {
+                    byAssignee[assignee] = { total: 0, awarded: 0, funding: 0 };
+                }
+                byAssignee[assignee].total++;
+                if (app.status === 'awarded') {
+                    byAssignee[assignee].awarded++;
+                    byAssignee[assignee].funding += (app.awardAmount || 0);
+                }
+            });
+
+            const container = document.getElementById('teamPerformance');
+            
+            if (Object.keys(byAssignee).length === 0) {
+                container.innerHTML = '<div class="empty-state">No team data available</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(byAssignee).map(([assignee, stats]) => {
+                const successRate = stats.total > 0 ? ((stats.awarded / stats.total) * 100).toFixed(1) : 0;
+                return `
+                    <div class="team-member-card">
+                        <div class="team-member-name">${assignee}</div>
+                        <div class="team-member-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Applications:</span>
+                                <span class="stat-value">${stats.total}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Awarded:</span>
+                                <span class="stat-value">${stats.awarded}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Success Rate:</span>
+                                <span class="stat-value">${successRate}%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Funding Won:</span>
+                                <span class="stat-value">$${stats.funding.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportReport(format) {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const userApplications = applications.filter(app => app.userId === currentUser.email);
+
+            if (format === 'csv') {
+                const csv = convertToCSV(userApplications);
+                downloadFile(csv, 'grant-report-' + new Date().toISOString().split('T')[0] + '.csv', 'text/csv');
+            } else if (format === 'pdf') {
+                alert('PDF export feature coming soon! For now, please use Print to PDF from your browser.');
+                window.print();
+            }
+        }
+
+        function convertToCSV(data) {
+            const headers = ['Grant Name', 'Provider', 'Amount', 'Status', 'Deadline', 'Assigned To', 'Award Amount', 'Success Rate'];
+            const rows = data.map(app => [
+                app.grantName,
+                app.provider,
+                app.amount,
+                app.status,
+                app.deadline,
+                app.assignedTo || '',
+                app.awardAmount || '',
+                app.awardAmount ? ((app.awardAmount / app.amount) * 100).toFixed(0) + '%' : ''
+            ]);
+            
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Show/hide custom date range
+        document.getElementById('dateRange').addEventListener('change', function() {
+            document.getElementById('customDateRange').style.display = 
+                this.value === 'custom' ? 'flex' : 'none';
+        });
+
+        // Initialize
+        updateReports();
+    </script>
+</body>
+</html>
