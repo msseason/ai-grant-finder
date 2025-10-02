@@ -17,6 +17,9 @@
                 <a href="dashboard.html" class="nav-item active">
                     <span class="icon">📊</span> Dashboard
                 </a>
+                <a href="business-profile.html" class="nav-item">
+                    <span class="icon">🏢</span> Business Profile
+                </a>
                 <a href="grants.html" class="nav-item">
                     <span class="icon">🔍</span> Browse Grants
                 </a>
@@ -27,7 +30,7 @@
                     <span class="icon">📈</span> Reports
                 </a>
                 <a href="profile.html" class="nav-item">
-                    <span class="icon">👤</span> Profile
+                    <span class="icon">👤</span> Account Settings
                 </a>
                 <a href="#" onclick="logout()" class="nav-item">
                     <span class="icon">🚪</span> Logout
@@ -43,11 +46,21 @@
             <header class="content-header">
                 <h1>Dashboard</h1>
                 <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='business-profile.html'">
+                        🏢 Complete Business Profile
+                    </button>
                     <button class="btn btn-primary" onclick="window.location.href='grants.html'">
                         + New Application
                     </button>
                 </div>
             </header>
+
+            <!-- Profile Completion Alert -->
+            <div id="profileAlert" class="alert alert-warning" style="display: none;">
+                <strong>⚠️ Complete Your Business Profile</strong>
+                <p>Get better grant matches and auto-generate application packages by completing your business profile.</p>
+                <button class="btn btn-primary" onclick="window.location.href='business-profile.html'">Complete Profile Now</button>
+            </div>
 
             <!-- Stats Overview -->
             <div class="stats-grid">
@@ -56,7 +69,7 @@
                     <div class="stat-content">
                         <div class="stat-label">Total Applications</div>
                         <div class="stat-value" id="totalApplications">0</div>
-                        <div class="stat-change positive">+3 this month</div>
+                        <div class="stat-change positive" id="newAppsChange">+0 this month</div>
                     </div>
                 </div>
 
@@ -65,7 +78,7 @@
                     <div class="stat-content">
                         <div class="stat-label">Awarded</div>
                         <div class="stat-value" id="awardedCount">0</div>
-                        <div class="stat-change positive">+1 this month</div>
+                        <div class="stat-change positive" id="awardedChange">+0 this month</div>
                     </div>
                 </div>
 
@@ -74,7 +87,7 @@
                     <div class="stat-content">
                         <div class="stat-label">Total Funding Won</div>
                         <div class="stat-value" id="totalFunding">$0</div>
-                        <div class="stat-change positive">+$50K this month</div>
+                        <div class="stat-change positive" id="fundingChange">+$0 this month</div>
                     </div>
                 </div>
 
@@ -108,9 +121,7 @@
                         </thead>
                         <tbody id="recentApplications">
                             <tr>
-                                <td colspan="6" class="empty-state">
-                                    No applications yet. <a href="grants.html">Browse grants</a> to get started.
-                                </td>
+                                <td colspan="6" class="empty-state">Loading applications...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -123,7 +134,7 @@
                     <h2>Upcoming Deadlines</h2>
                 </div>
                 <div class="deadline-list" id="upcomingDeadlines">
-                    <div class="empty-state">No upcoming deadlines</div>
+                    <div class="empty-state">Loading deadlines...</div>
                 </div>
             </div>
 
@@ -131,6 +142,10 @@
             <div class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="actions-grid">
+                    <button class="action-card" onclick="window.location.href='business-profile.html'">
+                        <span class="action-icon">🏢</span>
+                        <span class="action-label">Business Profile</span>
+                    </button>
                     <button class="action-card" onclick="window.location.href='grants.html'">
                         <span class="action-icon">🔍</span>
                         <span class="action-label">Find Grants</span>
@@ -142,10 +157,6 @@
                     <button class="action-card" onclick="window.location.href='reports.html'">
                         <span class="action-icon">📊</span>
                         <span class="action-label">View Reports</span>
-                    </button>
-                    <button class="action-card" onclick="exportData()">
-                        <span class="action-icon">📥</span>
-                        <span class="action-label">Export Data</span>
                     </button>
                 </div>
             </div>
@@ -161,7 +172,7 @@
             window.location.href = 'login.html';
         }
 
-        // Display user info
+        // Display user info in sidebar
         document.getElementById('userInfo').innerHTML = `
             <div class="user-avatar">${currentUser.fullName.charAt(0)}</div>
             <div class="user-details">
@@ -173,8 +184,13 @@
 
         // Load dashboard data
         function loadDashboard() {
+            // Get applications for current user
             const applications = JSON.parse(localStorage.getItem('applications') || '[]');
             const userApplications = applications.filter(app => app.userId === currentUser.email);
+
+            console.log('Loading dashboard for:', currentUser.email);
+            console.log('Total applications in system:', applications.length);
+            console.log('User applications:', userApplications.length);
 
             // Update stats
             document.getElementById('totalApplications').textContent = userApplications.length;
@@ -190,9 +206,31 @@
                 : 0;
             document.getElementById('successRate').textContent = successRate + '%';
 
+            // Calculate this month stats
+            const now = new Date();
+            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const thisMonthApps = userApplications.filter(app => new Date(app.createdAt) >= thisMonth);
+            const thisMonthAwarded = awarded.filter(app => new Date(app.createdAt) >= thisMonth);
+            const thisMonthFunding = thisMonthAwarded.reduce((sum, app) => sum + (app.awardAmount || 0), 0);
+
+            document.getElementById('newAppsChange').textContent = `+${thisMonthApps.length} this month`;
+            document.getElementById('awardedChange').textContent = `+${thisMonthAwarded.length} this month`;
+            document.getElementById('fundingChange').textContent = `+$${thisMonthFunding.toLocaleString()} this month`;
+
             // Load recent applications
             loadRecentApplications(userApplications);
             loadUpcomingDeadlines(userApplications);
+
+            // Check if business profile is complete
+            checkBusinessProfile();
+        }
+
+        function checkBusinessProfile() {
+            const businessProfile = JSON.parse(localStorage.getItem('businessProfile_' + currentUser.email) || 'null');
+            
+            if (!businessProfile || !businessProfile.isComplete) {
+                document.getElementById('profileAlert').style.display = 'block';
+            }
         }
 
         function loadRecentApplications(applications) {
@@ -227,9 +265,42 @@
         function loadUpcomingDeadlines(applications) {
             const container = document.getElementById('upcomingDeadlines');
             const upcoming = applications
-                .filter(app => new Date(app.deadline) > new Date() && app.status !== 'awarded')
+                .filter(app => new Date(app.deadline) > new Date() && app.status !== 'awarded' && app.status !== 'rejected')
                 .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
                 .slice(0, 5);
 
             if (upcoming.length === 0) {
                 container.innerHTML = '<div class="empty-state">No upcoming deadlines</div>';
+                return;
+            }
+
+            container.innerHTML = upcoming.map(app => {
+                const daysUntil = Math.ceil((new Date(app.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                return `
+                    <div class="deadline-item ${daysUntil <= 7 ? 'urgent' : daysUntil <= 14 ? 'soon' : ''}">
+                        <div class="deadline-info">
+                            <strong>${app.grantName}</strong>
+                            <span class="deadline-date">${new Date(app.deadline).toLocaleDateString()}</span>
+                        </div>
+                        <div class="deadline-days">${daysUntil} days</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewApplication(id) {
+            window.location.href = `applications.html?id=${id}`;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize dashboard
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 // ===================================
 // AI Grant Finder Pro - Main App Logic
+// UPDATED: Fixed demo data initialization
 // ===================================
 
 // Initialize app
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeApp() {
     // Check if we're on a protected page
-    const protectedPages = ['dashboard.html', 'applications.html', 'reports.html', 'profile.html', 'admin.html'];
+    const protectedPages = ['dashboard.html', 'applications.html', 'reports.html', 'profile.html', 'admin.html', 'business-profile.html'];
     const currentPage = window.location.pathname.split('/').pop();
     
     if (protectedPages.includes(currentPage)) {
@@ -43,7 +44,7 @@ function logout() {
 }
 
 // ===================================
-// Demo Data Initialization
+// Demo Data Initialization - FIXED
 // ===================================
 
 function initializeDemoData() {
@@ -55,13 +56,14 @@ function initializeDemoData() {
             fullName: 'Demo User',
             email: 'demo@grantfinder.com',
             password: 'demo1234',
-            companyName: 'Demo Company LLC',
+            companyName: 'Demo AI Business Solutions',
             plan: 'professional',
             role: 'owner',
             status: 'active',
-            createdAt: new Date().toISOString()
+            createdAt: '2024-12-01T10:00:00Z'
         });
         localStorage.setItem('users', JSON.stringify(users));
+        console.log('✅ Demo user created');
     }
     
     // Create admin user if doesn't exist
@@ -74,15 +76,17 @@ function initializeDemoData() {
             plan: 'enterprise',
             role: 'admin',
             status: 'active',
-            createdAt: new Date().toISOString()
+            createdAt: '2024-11-01T10:00:00Z'
         });
         localStorage.setItem('users', JSON.stringify(users));
+        console.log('✅ Admin user created');
     }
     
-    // Create demo applications if needed
+    // Create demo applications if needed - FIXED
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+    const demoApps = applications.filter(app => app.userId === 'demo@grantfinder.com');
     
-    if (applications.length === 0) {
+    if (demoApps.length === 0) {
         const demoApplications = [
             {
                 id: 'app_demo_1',
@@ -94,8 +98,9 @@ function initializeDemoData() {
                 deadline: '2025-06-15',
                 assignedTo: 'Demo User',
                 awardAmount: null,
-                notes: 'Strong technical proposal submitted',
+                notes: 'Strong technical proposal submitted. Waiting for reviewer feedback.',
                 createdAt: '2025-01-15T10:00:00Z',
+                updatedAt: '2025-01-20T14:30:00Z',
                 submittedDate: '2025-01-20T14:30:00Z'
             },
             {
@@ -108,26 +113,70 @@ function initializeDemoData() {
                 deadline: '2025-03-01',
                 assignedTo: 'Demo User',
                 awardAmount: 100000,
-                notes: 'Approved! $100K in AWS credits received',
+                notes: '✅ APPROVED! $100K in AWS credits received. Using for platform hosting and AI services.',
                 createdAt: '2024-12-01T09:00:00Z',
+                updatedAt: '2024-12-15T11:00:00Z',
                 submittedDate: '2024-12-05T11:00:00Z'
             },
             {
                 id: 'app_demo_3',
                 userId: 'demo@grantfinder.com',
-                grantName: 'Illinois SBIR Match',
+                grantName: 'Illinois SBIR Match Program',
                 provider: 'Illinois DCEO',
                 amount: 50000,
                 status: 'in-progress',
                 deadline: '2025-04-30',
                 assignedTo: 'Demo User',
                 awardAmount: null,
-                notes: 'Waiting for federal SBIR decision first',
-                createdAt: '2025-01-10T08:00:00Z'
+                notes: 'Waiting for federal SBIR decision before submitting state match application.',
+                createdAt: '2025-01-10T08:00:00Z',
+                updatedAt: '2025-01-10T08:00:00Z'
             }
         ];
         
-        localStorage.setItem('applications', JSON.stringify(demoApplications));
+        // Add demo applications to existing applications
+        const allApplications = [...applications, ...demoApplications];
+        localStorage.setItem('applications', JSON.stringify(allApplications));
+        console.log('✅ Demo applications created:', demoApplications.length);
+    } else {
+        console.log('✅ Demo applications already exist:', demoApps.length);
+    }
+
+    // Create demo business profile
+    const demoProfile = localStorage.getItem('businessProfile_demo@grantfinder.com');
+    if (!demoProfile) {
+        const demoBusinessProfile = {
+            userId: 'demo@grantfinder.com',
+            legalBusinessName: 'Demo AI Business Solutions LLC',
+            businessStructure: 'llc',
+            yearFounded: '2024',
+            employees: '2-10',
+            revenue: '50k-250k',
+            streetAddress: '123 Innovation Drive',
+            city: 'Joliet',
+            state: 'Illinois',
+            county: 'Will County',
+            zipCode: '60435',
+            industries: ['AI & Technology', 'Workforce Development', 'Entrepreneurship'],
+            audiences: ['Displaced Workers', 'Underemployed', 'Aspiring Entrepreneurs'],
+            missionStatement: 'We empower displaced workers to build successful AI businesses through accessible training and business-in-a-box solutions.',
+            problemStatement: 'Rapid AI advancement is displacing workers while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation.',
+            solutionStatement: 'We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone to start an AI-powered business.',
+            valueProposition: 'Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility.',
+            impactStatement: 'We help individuals transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days.',
+            productsServices: '1) AI Prompt Package ($150), 2) Business Starter Kit ($500), 3) Complete Business Bundle ($1000)',
+            priceRange: '$150 - $1,000',
+            customersServed: '50',
+            fundingUse: 'Platform development, marketing to displaced workers, curriculum creation, pilot program for 100 participants',
+            outcomes: 'Train 500 displaced workers, 70% job placement rate, $2M in aggregate income generated',
+            communityImpact: 'We address the AI skills gap in Will County, where unemployment affects displaced manufacturing workers.',
+            isComplete: true,
+            completionPercentage: 100,
+            lastUpdated: '2024-12-01T10:00:00Z'
+        };
+        
+        localStorage.setItem('businessProfile_demo@grantfinder.com', JSON.stringify(demoBusinessProfile));
+        console.log('✅ Demo business profile created');
     }
 }
 
@@ -155,7 +204,8 @@ function formatDate(dateString) {
 function calculateDaysUntil(dateString) {
     const today = new Date();
     const targetDate = new Date(dateString);
-    const diffTime = targetDate - today;const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = targetDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
 }
 
@@ -172,7 +222,14 @@ function convertArrayToCSV(data) {
     if (data.length === 0) return '';
     
     const headers = Object.keys(data[0]);
-    const rows = data.map(obj => headers.map(header => obj[header] || ''));
+    const rows = data.map(obj => headers.map(header => {
+        const value = obj[header];
+        // Escape commas and quotes
+        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return '"' + value.replace(/"/g, '""') + '"';
+        }
+        return value || '';
+    }));
     
     return [headers, ...rows].map(row => row.join(',')).join('\n');
 }
@@ -202,7 +259,7 @@ function showNotification(message, type = 'success') {
         top: 20px;
         right: 20px;
         padding: 1rem 1.5rem;
-        background: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+        background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--info)'};
         color: white;
         border-radius: var(--radius-md);
         box-shadow: var(--shadow-lg);
@@ -217,36 +274,6 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-
-// ===================================
-// Local Storage Helpers
-// ===================================
-
-const DB = {
-    get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-    set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
-    add: (key, item) => {
-        const items = DB.get(key);
-        items.push(item);
-        DB.set(key, items);
-        return item;
-    },
-    update: (key, id, updates) => {
-        const items = DB.get(key);
-        const index = items.findIndex(item => item.id === id);
-        if (index !== -1) {
-            items[index] = { ...items[index], ...updates };
-            DB.set(key, items);
-            return items[index];
-        }
-        return null;
-    },
-    delete: (key, id) => {
-        const items = DB.get(key);
-        const filtered = items.filter(item => item.id !== id);
-        DB.set(key, filtered);
-    }
-};
 
 // ===================================
 // Animation Keyframes
@@ -275,5 +302,75 @@ style.textContent = `
             opacity: 0;
         }
     }
+    
+    .deadline-item.soon {
+        border-left-color: var(--warning);
+        background: #fffbeb;
+    }
+    
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .checkbox-card {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .checkbox-card:hover {
+        border-color: var(--primary);
+        background: var(--gray-100);
+    }
+    
+    .checkbox-card input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .checkbox-card input[type="checkbox"]:checked + span {
+        font-weight: 600;
+        color: var(--primary);
+    }
+    
+    .ai-message {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+    }
+    
+    .user-message {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        text-align: right;
+    }
+    
+    .alert-warning {
+        background: #fffbeb;
+        border: 2px solid var(--warning);
+        color: #92400e;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-warning strong {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
 `;
 document.head.appendChild(style);
+
+console.log('✅ App initialized');
