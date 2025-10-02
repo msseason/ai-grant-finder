@@ -1,6 +1,6 @@
 // ===================================
 // AI Grant Finder Pro - Main App Logic
-// UPDATED: Fixed demo data initialization
+// UPDATED: Fixed demo deadlines to be in future
 // ===================================
 
 // Initialize app
@@ -44,7 +44,7 @@ function logout() {
 }
 
 // ===================================
-// Demo Data Initialization - FIXED
+// Demo Data Initialization - FIXED DEADLINES
 // ===================================
 
 function initializeDemoData() {
@@ -82,11 +82,17 @@ function initializeDemoData() {
         console.log('✅ Admin user created');
     }
     
-    // Create demo applications if needed - FIXED
+    // Create demo applications with FUTURE deadlines - FIXED
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
     const demoApps = applications.filter(app => app.userId === 'demo@grantfinder.com');
     
     if (demoApps.length === 0) {
+        // Calculate future dates
+        const today = new Date();
+        const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const in60Days = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000);
+        const in90Days = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+        
         const demoApplications = [
             {
                 id: 'app_demo_1',
@@ -95,7 +101,7 @@ function initializeDemoData() {
                 provider: 'National Science Foundation',
                 amount: 275000,
                 status: 'submitted',
-                deadline: '2025-06-15',
+                deadline: in60Days.toISOString().split('T')[0], // 60 days from now
                 assignedTo: 'Demo User',
                 awardAmount: null,
                 notes: 'Strong technical proposal submitted. Waiting for reviewer feedback.',
@@ -110,7 +116,7 @@ function initializeDemoData() {
                 provider: 'Amazon Web Services',
                 amount: 100000,
                 status: 'awarded',
-                deadline: '2025-03-01',
+                deadline: '2025-03-01', // Past deadline (already awarded)
                 assignedTo: 'Demo User',
                 awardAmount: 100000,
                 notes: '✅ APPROVED! $100K in AWS credits received. Using for platform hosting and AI services.',
@@ -125,7 +131,7 @@ function initializeDemoData() {
                 provider: 'Illinois DCEO',
                 amount: 50000,
                 status: 'in-progress',
-                deadline: '2025-04-30',
+                deadline: in90Days.toISOString().split('T')[0], // 90 days from now
                 assignedTo: 'Demo User',
                 awardAmount: null,
                 notes: 'Waiting for federal SBIR decision before submitting state match application.',
@@ -137,12 +143,12 @@ function initializeDemoData() {
         // Add demo applications to existing applications
         const allApplications = [...applications, ...demoApplications];
         localStorage.setItem('applications', JSON.stringify(allApplications));
-        console.log('✅ Demo applications created:', demoApplications.length);
+        console.log('✅ Demo applications created with future deadlines:', demoApplications.length);
     } else {
         console.log('✅ Demo applications already exist:', demoApps.length);
     }
 
-    // Create demo business profile
+    // Create demo business profile with NATIONWIDE reach
     const demoProfile = localStorage.getItem('businessProfile_demo@grantfinder.com');
     if (!demoProfile) {
         const demoBusinessProfile = {
@@ -157,26 +163,33 @@ function initializeDemoData() {
             state: 'Illinois',
             county: 'Will County',
             zipCode: '60435',
+            
+            // Geographic Reach - ADDED
+            geographicReach: 'nationwide',
+            targetStates: ['Illinois', 'Indiana', 'Wisconsin', 'Michigan', 'Ohio', 'Iowa', 'Missouri'],
+            servesRuralAreas: true,
+            servesUrbanAreas: true,
+            
             industries: ['AI & Technology', 'Workforce Development', 'Entrepreneurship'],
             audiences: ['Displaced Workers', 'Underemployed', 'Aspiring Entrepreneurs'],
-            missionStatement: 'We empower displaced workers to build successful AI businesses through accessible training and business-in-a-box solutions.',
-            problemStatement: 'Rapid AI advancement is displacing workers while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation.',
-            solutionStatement: 'We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone to start an AI-powered business.',
-            valueProposition: 'Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility.',
-            impactStatement: 'We help individuals transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days.',
+            missionStatement: 'We empower displaced workers nationwide to build successful AI businesses through accessible training and business-in-a-box solutions.',
+            problemStatement: 'Rapid AI advancement is displacing workers across America while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation.',
+            solutionStatement: 'We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone nationwide to start an AI-powered business.',
+            valueProposition: 'Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility and delivered digitally to serve customers nationwide.',
+            impactStatement: 'We help individuals across the United States transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days. Our digital delivery model enables us to serve rural and urban communities equally.',
             productsServices: '1) AI Prompt Package ($150), 2) Business Starter Kit ($500), 3) Complete Business Bundle ($1000)',
             priceRange: '$150 - $1,000',
             customersServed: '50',
-            fundingUse: 'Platform development, marketing to displaced workers, curriculum creation, pilot program for 100 participants',
-            outcomes: 'Train 500 displaced workers, 70% job placement rate, $2M in aggregate income generated',
-            communityImpact: 'We address the AI skills gap in Will County, where unemployment affects displaced manufacturing workers.',
+            fundingUse: 'Platform development, nationwide marketing campaign, curriculum creation, pilot program for 100 participants across multiple states',
+            outcomes: 'Train 500 displaced workers nationwide, 70% job placement rate, $2M in aggregate income generated, serve 10+ states',
+            communityImpact: 'We address the nationwide AI skills gap, particularly in communities affected by manufacturing decline and automation. Our digital model enables us to serve underserved rural areas alongside urban centers.',
             isComplete: true,
             completionPercentage: 100,
             lastUpdated: '2024-12-01T10:00:00Z'
         };
         
         localStorage.setItem('businessProfile_demo@grantfinder.com', JSON.stringify(demoBusinessProfile));
-        console.log('✅ Demo business profile created');
+        console.log('✅ Demo business profile created with nationwide reach');
     }
 }
 
