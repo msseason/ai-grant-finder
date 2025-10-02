@@ -90,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- Business Information -->
+            <!-- Basic Business Information -->
             <div class="card">
                 <div class="card-header">
                     <h2>📋 Basic Business Information</h2>
@@ -165,11 +165,14 @@
                 </form>
             </div>
 
-            <!-- Location Information -->
+            <!-- Location & Geographic Reach - NEW SECTION -->
             <div class="card">
                 <div class="card-header">
-                    <h2>📍 Location Information</h2>
+                    <h2>📍 Location & Geographic Reach</h2>
+                    <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0;">Define where you operate and who you serve</p>
                 </div>
+                
+                <h3 style="margin-bottom: 1rem;">Primary Business Location</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Street Address *</label>
@@ -184,11 +187,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>State *</label>
-                        <input type="text" id="state" required placeholder="Illinois" value="Illinois">
+                        <input type="text" id="state" required placeholder="Illinois">
                     </div>
                     <div class="form-group">
                         <label>County *</label>
-                        <input type="text" id="county" required placeholder="Will County" value="Will County">
+                        <input type="text" id="county" required placeholder="Will County">
                     </div>
                 </div>
 
@@ -201,6 +204,65 @@
                         <label>Congressional District</label>
                         <input type="text" id="congressionalDistrict" placeholder="IL-11">
                     </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
+
+                <h3 style="margin-bottom: 1rem;">Geographic Reach & Target Market *</h3>
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 1rem;">
+                    Where do you serve customers? This helps match you with location-specific grants.
+                </p>
+
+                <div class="form-group">
+                    <label>Primary Geographic Reach *</label>
+                    <select id="geographicReach" required onchange="updateGeographicOptions()">
+                        <option value="">Select your reach</option>
+                        <option value="local">Local (City/County only)</option>
+                        <option value="regional">Regional (Multiple counties/metro area)</option>
+                        <option value="statewide">Statewide (Entire state)</option>
+                        <option value="multi-state">Multi-State (Several states)</option>
+                        <option value="nationwide">Nationwide (All 50 states)</option>
+                        <option value="international">International (Beyond US)</option>
+                    </select>
+                </div>
+
+                <div id="multiStateSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Target States (Select all that apply)</label>
+                        <div class="checkbox-grid" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gray-200); padding: 1rem; border-radius: 8px;">
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Illinois"><span>Illinois</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Indiana"><span>Indiana</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Wisconsin"><span>Wisconsin</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Michigan"><span>Michigan</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Ohio"><span>Ohio</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Iowa"><span>Iowa</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Missouri"><span>Missouri</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Minnesota"><span>Minnesota</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Kentucky"><span>Kentucky</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Other"><span>Other States</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="servesRuralAreas" style="width: auto;">
+                            <span>We serve rural areas</span>
+                        </label>
+                        <small>Check if you serve rural or underserved communities (qualifies for additional grants)</small>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="servesUrbanAreas" style="width: auto;">
+                            <span>We serve urban areas</span>
+                        </label>
+                        <small>Check if you serve cities and metropolitan areas</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>💡 Grant Matching Tip:</strong> Your geographic reach determines which grants you qualify for. Nationwide reach opens federal grants, while local focus qualifies for community grants. Many businesses check both rural AND urban to maximize opportunities.
                 </div>
             </div>
 
@@ -300,9 +362,6 @@
             <div class="card">
                 <div class="card-header">
                     <h2>📝 Business Description (Grant-Optimized)</h2>
-                    <button class="btn btn-secondary" onclick="optimizeWithAI('description')">
-                        ✨ Optimize with AI
-                    </button>
                 </div>
 
                 <div class="alert alert-info">
@@ -311,28 +370,28 @@
 
                 <div class="form-group">
                     <label>Mission Statement (1-2 sentences) *</label>
-                    <textarea id="missionStatement" rows="3" required placeholder="What is your core mission? Example: We empower displaced workers to build successful AI businesses through accessible training and business-in-a-box solutions."></textarea>
+                    <textarea id="missionStatement" rows="3" required placeholder="What is your core mission? Example: We empower displaced workers nationwide to build successful AI businesses through accessible training and business-in-a-box solutions."></textarea>
                     <small>This appears in every grant application - make it compelling!</small>
                 </div>
 
                 <div class="form-group">
                     <label>Problem You're Solving *</label>
-                    <textarea id="problemStatement" rows="4" required placeholder="What problem does your business address? Example: Rapid AI advancement is displacing workers while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation."></textarea>
+                    <textarea id="problemStatement" rows="4" required placeholder="What problem does your business address? Example: Rapid AI advancement is displacing workers across America while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Your Solution *</label>
-                    <textarea id="solutionStatement" rows="4" required placeholder="How does your business solve this problem? Example: We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone to start an AI-powered business."></textarea>
+                    <textarea id="solutionStatement" rows="4" required placeholder="How does your business solve this problem? Example: We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone nationwide to start an AI-powered business."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Unique Value Proposition *</label>
-                    <textarea id="valueProposition" rows="3" required placeholder="What makes you different? Example: Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility and proven success frameworks."></textarea>
+                    <textarea id="valueProposition" rows="3" required placeholder="What makes you different? Example: Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility and delivered digitally to serve customers nationwide."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Impact & Outcomes *</label>
-                    <textarea id="impactStatement" rows="4" required placeholder="What impact do you create? Example: We've helped 50+ individuals transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days. Our model addresses unemployment, skills gaps, and economic empowerment simultaneously."></textarea>
+                    <textarea id="impactStatement" rows="4" required placeholder="What impact do you create? Example: We help individuals across the United States transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days. Our digital delivery model enables us to serve rural and urban communities equally."></textarea>
                 </div>
             </div>
 
@@ -367,12 +426,12 @@
 
                 <div class="form-group">
                     <label>How Will You Use Grant Funding? *</label>
-                    <textarea id="fundingUse" rows="5" required placeholder="Be specific about how grant funds will be used. Example: 1) Platform Development ($50K) - Build AI training platform, 2) Marketing ($25K) - Reach displaced workers, 3) Curriculum Development ($15K) - Create training materials, 4) Pilot Program ($10K) - Serve 100 participants"></textarea>
+                    <textarea id="fundingUse" rows="5" required placeholder="Be specific about how grant funds will be used. Example: 1) Platform Development ($50K) - Build AI training platform, 2) Marketing ($25K) - Reach displaced workers nationwide, 3) Curriculum Development ($15K) - Create training materials, 4) Pilot Program ($10K) - Serve 100 participants across multiple states"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Measurable Outcomes & Metrics *</label>
-                    <textarea id="outcomes" rows="4" required placeholder="What measurable results will you achieve? Example: Train 500 displaced workers in AI skills, 70% job placement rate, $2M in aggregate income generated for participants, 85% participant satisfaction rate"></textarea>
+                    <textarea id="outcomes" rows="4" required placeholder="What measurable results will you achieve? Example: Train 500 displaced workers nationwide, 70% job placement rate, $2M in aggregate income generated for participants, serve 10+ states, 85% participant satisfaction rate"></textarea>
                 </div>
 
                 <div class="form-row">
@@ -434,7 +493,7 @@
 
                 <div class="form-group">
                     <label>Community Impact Statement *</label>
-                    <textarea id="communityImpact" rows="4" required placeholder="How does your business benefit the community? Example: We address the AI skills gap in Will County, where 15% unemployment affects displaced manufacturing workers. Our program provides accessible AI training, creating economic opportunities and reducing dependency on social services."></textarea>
+                    <textarea id="communityImpact" rows="4" required placeholder="How does your business benefit the community? Example: We address the nationwide AI skills gap, particularly in communities affected by manufacturing decline and automation. Our digital model enables us to serve underserved rural areas alongside urban centers, creating economic opportunities where they're needed most."></textarea>
                 </div>
 
                 <div class="form-group">
@@ -444,7 +503,7 @@
 
                 <div class="form-group">
                     <label>Long-Term Sustainability Plan</label>
-                    <textarea id="sustainability" rows="4" placeholder="How will your business sustain beyond grant funding? Example: Revenue from business packages ($150-1000), grant writing services for clients, white-label licensing to other regions, corporate training contracts"></textarea>
+                    <textarea id="sustainability" rows="4" placeholder="How will your business sustain beyond grant funding? Example: Revenue from business packages ($150-1000), grant writing services for clients, white-label licensing to other regions, corporate training contracts, nationwide digital delivery model"></textarea>
                 </div>
             </div>
 
@@ -514,6 +573,16 @@
             document.getElementById('aiAssistantCard').style.display = 'block';
             aiConversationStep = 1;
             aiResponses = {};
+            
+            // Reset conversation
+            document.getElementById('aiConversation').innerHTML = `
+                <div class="ai-message">
+                    <strong>AI Assistant:</strong>
+                    <p>Hello! I'm your AI Grant Writing Assistant. I'll help you create a powerful business profile that wins grants. Let's start with a few questions:</p>
+                    <p><strong>Question 1 of 5:</strong> What is your primary industry or business focus?</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">Examples: AI & Technology, Workforce Development, Healthcare, Clean Energy, Education, etc.</p>
+                </div>
+            `;
             
             // Scroll to AI assistant
             document.getElementById('aiAssistantCard').scrollIntoView({ behavior: 'smooth' });
@@ -644,11 +713,11 @@
                 
                 problem: `${responses.problem || 'Many individuals face barriers to economic opportunity'}. This challenge is particularly acute for ${responses.audience || 'underserved populations'}, who lack access to ${responses.industry || 'industry-specific'} training and resources. The rapid pace of technological change has created a significant skills gap, leaving many qualified individuals unable to capitalize on emerging opportunities.`,
                 
-                solution: `Our ${responses.unique || 'innovative'} approach provides comprehensive business-in-a-box solutions that eliminate traditional barriers to entry. We offer affordable packages ($150-$1,000) that include proven frameworks, training materials, and ongoing support, enabling participants to launch income-generating businesses quickly and sustainably.`,
+                solution: `Our ${responses.unique || 'innovative'} approach provides comprehensive business-in-a-box solutions that eliminate traditional barriers to entry. We offer affordable packages that include proven frameworks, training materials, and ongoing support, enabling participants to launch income-generating businesses quickly and sustainably.`,
                 
                 value: `Unlike traditional training programs that focus solely on skills development, we provide complete business infrastructure including ${responses.unique || 'proprietary tools'}, market-tested strategies, and continuous support. Our accessible pricing model ensures economic barriers don't prevent participation, while our proven success framework delivers measurable results.`,
                 
-                impact: `${responses.impact || 'We create measurable economic impact'} by transforming ${responses.audience || 'participants'} into successful entrepreneurs. Our model addresses multiple community needs simultaneously: reducing unemployment, building economic resilience, fostering innovation, and creating sustainable income opportunities. Each participant generates an average of $3,500/month in new income, contributing to local economic development and tax base growth.`
+                impact: `${responses.impact || 'We create measurable economic impact'} by transforming ${responses.audience || 'participants'} into successful entrepreneurs. Our model addresses multiple community needs simultaneously: reducing unemployment, building economic resilience, fostering innovation, and creating sustainable income opportunities. Each participant generates significant new income, contributing to local economic development and tax base growth.`
             };
         }
 
@@ -703,8 +772,15 @@
             updateQuickResponses();
         }
 
-        function optimizeWithAI(field) {
-            alert('🤖 AI optimization feature: This would use GPT-4 to enhance your ' + field + ' based on grant-winning patterns. Coming soon in production version!');
+        function updateGeographicOptions() {
+            const reach = document.getElementById('geographicReach').value;
+            const multiStateSection = document.getElementById('multiStateSection');
+            
+            if (reach === 'multi-state') {
+                multiStateSection.style.display = 'block';
+            } else {
+                multiStateSection.style.display = 'none';
+            }
         }
 
         function saveProfile() {
@@ -727,6 +803,12 @@
                 county: document.getElementById('county').value,
                 zipCode: document.getElementById('zipCode').value,
                 congressionalDistrict: document.getElementById('congressionalDistrict').value,
+                
+                // Geographic Reach - NEW
+                geographicReach: document.getElementById('geographicReach').value,
+                targetStates: Array.from(document.querySelectorAll('input[name="targetState"]:checked')).map(cb => cb.value),
+                servesRuralAreas: document.getElementById('servesRuralAreas').checked,
+                servesUrbanAreas: document.getElementById('servesUrbanAreas').checked,
                 
                 // Industry & Focus
                 industries: Array.from(document.querySelectorAll('input[name="industry"]:checked')).map(cb => cb.value),
@@ -774,7 +856,7 @@
             // Validate required fields
             const requiredFields = [
                 'legalBusinessName', 'businessStructure', 'yearFounded', 'employees', 'revenue',
-                'streetAddress', 'city', 'state', 'county', 'zipCode',
+                'streetAddress', 'city', 'state', 'county', 'zipCode', 'geographicReach',
                 'missionStatement', 'problemStatement', 'solutionStatement', 'valueProposition', 'impactStatement',
                 'productsServices', 'priceRange', 'fundingUse', 'outcomes', 'communityImpact'
             ];
@@ -802,8 +884,9 @@
             // Show success message
             alert('✅ Business Profile Saved Successfully!\n\n' +
                   'Your profile is now ' + profileData.completionPercentage + '% complete.\n\n' +
+                  'Geographic Reach: ' + profileData.geographicReach + '\n\n' +
                   'This information will be used to:\n' +
-                  '• Match you with relevant grants\n' +
+                  '• Match you with relevant grants (federal, state, local)\n' +
                   '• Auto-generate application packages\n' +
                   '• Calculate success predictions\n' +
                   '• Personalize your grant recommendations');
@@ -813,13 +896,13 @@
         }
 
         function calculateCompletion() {
-            const totalFields = 30; // Total number of profile fields
+            const totalFields = 32; // Updated total
             let completedFields = 0;
 
             // Check each field
             const fields = [
                 'legalBusinessName', 'businessStructure', 'yearFounded', 'employees', 'revenue',
-                'streetAddress', 'city', 'state', 'county', 'zipCode',
+                'streetAddress', 'city', 'state', 'county', 'zipCode', 'geographicReach',
                 'missionStatement', 'problemStatement', 'solutionStatement', 'valueProposition', 'impactStatement',
                 'productsServices', 'priceRange', 'fundingUse', 'outcomes', 'communityImpact'
             ];
@@ -832,6 +915,7 @@
             // Check checkboxes
             if (document.querySelectorAll('input[name="industry"]:checked').length > 0) completedFields++;
             if (document.querySelectorAll('input[name="audience"]:checked').length > 0) completedFields++;
+            if (document.getElementById('servesRuralAreas').checked || document.getElementById('servesUrbanAreas').checked) completedFields++;
 
             const percentage = Math.round((completedFields / totalFields) * 100);
             
@@ -853,6 +937,7 @@
             const profileData = {
                 legalBusinessName: document.getElementById('legalBusinessName').value,
                 missionStatement: document.getElementById('missionStatement').value,
+                geographicReach: document.getElementById('geographicReach').value,
                 industries: Array.from(document.querySelectorAll('input[name="industry"]:checked')).map(cb => cb.value),
                 audiences: Array.from(document.querySelectorAll('input[name="audience"]:checked')).map(cb => cb.value)
             };
@@ -861,6 +946,8 @@
 Business Name: ${profileData.legalBusinessName || 'Not provided'}
 
 Mission: ${profileData.missionStatement || 'Not provided'}
+
+Geographic Reach: ${profileData.geographicReach || 'Not selected'}
 
 Industries: ${profileData.industries.join(', ') || 'None selected'}
 
@@ -880,7 +967,7 @@ Completion: ${calculateCompletion()}%
                 return;
             }
 
-            // Populate all fields
+            // Populate all fields (same as before, plus new geographic fields)
             document.getElementById('legalBusinessName').value = savedProfile.legalBusinessName || '';
             document.getElementById('dbaName').value = savedProfile.dbaName || '';
             document.getElementById('businessStructure').value = savedProfile.businessStructure || '';
@@ -892,10 +979,25 @@ Completion: ${calculateCompletion()}%
             
             document.getElementById('streetAddress').value = savedProfile.streetAddress || '';
             document.getElementById('city').value = savedProfile.city || '';
-            document.getElementById('state').value = savedProfile.state || 'Illinois';
-            document.getElementById('county').value = savedProfile.county || 'Will County';
+            document.getElementById('state').value = savedProfile.state || '';
+            document.getElementById('county').value = savedProfile.county || '';
             document.getElementById('zipCode').value = savedProfile.zipCode || '';
             document.getElementById('congressionalDistrict').value = savedProfile.congressionalDistrict || '';
+            
+            // Geographic reach - NEW
+            document.getElementById('geographicReach').value = savedProfile.geographicReach || '';
+            document.getElementById('servesRuralAreas').checked = savedProfile.servesRuralAreas || false;
+            document.getElementById('servesUrbanAreas').checked = savedProfile.servesUrbanAreas || false;
+            
+            if (savedProfile.geographicReach === 'multi-state') {
+                document.getElementById('multiStateSection').style.display = 'block';
+                if (savedProfile.targetStates) {
+                    savedProfile.targetStates.forEach(state => {
+                        const checkbox = document.querySelector(`input[name="targetState"][value="${state}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+            }
             
             document.getElementById('missionStatement').value = savedProfile.missionStatement || '';
             document.getElementById('problemStatement').value = savedProfile.problemStatement || '';
