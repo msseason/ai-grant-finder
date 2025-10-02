@@ -1,0 +1,84 @@
+{
+  "federal_grants": [
+    {
+      "id": "FED001",
+      "name": "SBIR/STTR Program - AI & Technology Innovation",
+      "provider": "National Science Foundation (NSF)",
+      "type": "Federal",
+      "category": ["Technology Innovation", "AI Development", "Workforce Training"],
+      "amount_min": 50000,
+      "amount_max": 1800000,
+      "phase": "Phase I: $50K-$275K | Phase II: $750K-$1.8M",
+      "deadline": "Rolling - Multiple cycles per year",
+      "next_deadline": "2025-03-15",
+      "eligibility": [
+        "US-based small business",
+        "Fewer than 500 employees",
+        "For-profit entity",
+        "Technology-focused innovation"
+      ],
+      "perfect_for_your_business": true,
+      "alignment_score": 95,
+      "why_perfect": "Directly funds AI technology development and commercialization. Your AI business-in-a-box packages qualify as innovative technology solutions that address workforce development needs.",
+      "application_url": "https://www.sbir.gov/",
+      "utilization": [
+        "AI platform development",
+        "Prompt engineering tools creation",
+        "Business automation software",
+        "Training program development",
+        "Market research and validation",
+        "Customer discovery activities",
+        "Intellectual property protection"
+      ],
+      "success_rate": "18.5%",
+      "avg_award": 875000,
+      "non_dilutive": true,
+      "key_requirements": [
+        "Strong technical team (PhD preferred)",
+        "Clear commercialization plan",
+        "Customer discovery evidence",
+        "IP strategy",
+        "Letters of support from potential customers"
+      ]
+    }
+  ],
+  "corporate_grants": [
+    {
+      "id": "CORP001",
+      "name": "AWS Activate Credits",
+      "provider": "Amazon Web Services",
+      "type": "Corporate",
+      "category": ["Cloud Credits", "Startup Support", "Technology Infrastructure"],
+      "amount_min": 5000,
+      "amount_max": 100000,
+      "deadline": "Rolling applications",
+      "next_deadline": "Rolling basis",
+      "eligibility": [
+        "Early-stage startups",
+        "Technology companies",
+        "Accelerator/incubator members (for higher tiers)"
+      ],
+      "perfect_for_your_business": true,
+      "alignment_score": 89,
+      "why_perfect": "Free cloud infrastructure credits reduce your operating costs significantly. Essential for hosting your AI platform and can save you thousands in infrastructure costs.",
+      "application_url": "https://aws.amazon.com/activate/",
+      "utilization": [
+        "Cloud hosting for AI platform",
+        "Database services (RDS, DynamoDB)",
+        "AI/ML services (SageMaker, Bedrock)",
+        "Storage (S3)",
+        "Compute resources (EC2)",
+        "Reduces infrastructure costs to near-zero"
+      ],
+      "value": "Up to $100,000 in AWS credits",
+      "additional_benefits": [
+        "Technical support",
+        "Training credits",
+        "Architecture guidance",
+        "Startup resources"
+      ],
+      "application_time": "15 minutes",
+      "approval_time": "1-2 weeks"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+
+---
+
+## FILE 5: N8N_GUIDE.md
+
+**Filename:** `N8N_GUIDE.md`
+
+```markdown
+# N8N Automation Setup Guide
+## For AI Grant Website
+
+---
+
+## 🎯 What is N8N?
+
+N8N is a powerful, open-source workflow automation tool (like Zapier, but better and cheaper).
+
+**Why N8N over Zapier:**
+- **Cost:** $72/year vs $882/year (saves $810)
+- **Power:** Unlimited executions vs limited
+- **Privacy:** Your server vs their servers
+- **Flexibility:** Full code access vs templates only
+
+---
+
+## 🚀 Quick Setup (30 Minutes)
+
+### Option 1: Self-Hosted (Recommended - $6/month)
+
+**Requirements:**
+- DigitalOcean account (or any VPS provider)
+- 30 minutes of time
+- Basic command line knowledge
+
+**Step-by-Step:**
+
+```bash
+# 1. Create DigitalOcean Droplet
+# - Go to digitalocean.com
+# - Create account
+# - Create Droplet: Ubuntu 22.04, $6/month plan
+# - Note your server IP address
+
+# 2. SSH into your server
+ssh root@YOUR_SERVER_IP
+
+# 3. Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+
+# 4. Run N8N
+docker run -d \
+  --restart unless-stopped \
+  --name n8n \
+  -p 5678:5678 \
+  -v ~/.n8n:/home/node/.n8n \
+  n8nio/n8n
+
+# 5. Access N8N
+# Open browser: http://YOUR_SERVER_IP:5678
+# Create your account
+# Start building workflows!
