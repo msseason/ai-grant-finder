@@ -1,1071 +1,189 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Profile - AI Grant Finder Pro</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>🚀 Grant Finder</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <span class="icon">📊</span> Dashboard
-                </a>
-                <a href="business-profile.html" class="nav-item active">
-                    <span class="icon">🏢</span> Business Profile
-                </a>
-                <a href="grants.html" class="nav-item">
-                    <span class="icon">🔍</span> Browse Grants
-                </a>
-                <a href="applications.html" class="nav-item">
-                    <span class="icon">📝</span> My Applications
-                </a>
-                <a href="reports.html" class="nav-item">
-                    <span class="icon">📈</span> Reports
-                </a>
-                <a href="profile.html" class="nav-item">
-                    <span class="icon">👤</span> Account Settings
-                </a>
-                <a href="#" onclick="logout()" class="nav-item">
-                    <span class="icon">🚪</span> Logout
-                </a>
-            </nav>
-        </aside>
+<!-- Add this in the <script> section, replace the existing AI functions -->
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Business Profile</h1>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="showAIAssistant()">
-                        🤖 AI Profile Assistant
-                    </button>
-                    <button class="btn btn-success" onclick="saveProfile()">
-                        💾 Save Profile
-                    </button>
-                </div>
-            </header>
+<script>
+// Enhanced AI Assistant with multi-select
+let aiConversationStep = 1;
+let aiResponses = {};
+let multiSelectMode = false;
+let selectedOptions = [];
 
-            <!-- Profile Completion Progress -->
-            <div class="card">
-                <h3>Profile Completion</h3>
-                <div class="progress-bar" style="height: 20px; background: var(--gray-200); border-radius: 10px; overflow: hidden;">
-                    <div id="completionProgress" class="progress-fill" style="height: 100%; background: var(--success); width: 0%; transition: width 0.5s;"></div>
-                </div>
-                <p id="completionText" style="margin-top: 0.5rem; color: var(--gray-600);">0% Complete</p>
-            </div>
+const aiQuestions = [
+    {
+        step: 1,
+        question: "What industries does your business focus on?",
+        hint: "Select ALL that apply - you can choose multiple",
+        field: "industry",
+        multiSelect: true,
+        quickResponses: [
+            "AI & Technology",
+            "Workforce Development", 
+            "Education & Training",
+            "Healthcare",
+            "Clean Energy",
+            "Entrepreneurship"
+        ]
+    },
+    {
+        step: 2,
+        question: "Who are your primary beneficiaries?",
+        hint: "Select ALL that apply - you can choose multiple",
+        field: "audience",
+        multiSelect: true,
+        quickResponses: [
+            "Displaced Workers",
+            "Underemployed",
+            "Aspiring Entrepreneurs",
+            "Small Businesses",
+            "Veterans",
+            "Underserved Communities"
+        ]
+    },
+    {
+        step: 3,
+        question: "What specific problem does your business solve?",
+        hint: "Describe the main challenge you address",
+        field: "problem",
+        multiSelect: false
+    },
+    {
+        step: 4,
+        question: "What makes your solution unique?",
+        hint: "What sets you apart from competitors?",
+        field: "unique",
+        multiSelect: false
+    },
+    {
+        step: 5,
+        question: "What measurable impact have you created?",
+        hint: "Numbers, percentages, specific outcomes",
+        field: "impact",
+        multiSelect: false
+    }
+];
 
-            <!-- AI Assistant Card -->
-            <div id="aiAssistantCard" class="card" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.2);">
-                    <h2 style="color: white;">🤖 AI Business Profile Assistant</h2>
-                    <button class="modal-close" onclick="hideAIAssistant()" style="color: white;">&times;</button>
-                </div>
-                <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; opacity: 0.95;">
-                        As an expert grant writer with 10 years of experience, I'll help you create a compelling business profile that maximizes your grant success. Answer a few questions and I'll optimize your profile for grant applications.
-                    </p>
-                    
-                    <div id="aiConversation" style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; max-height: 400px; overflow-y: auto;">
-                        <div class="ai-message">
-                            <strong>AI Assistant:</strong>
-                            <p>Hello! I'm your AI Grant Writing Assistant. I'll help you create a powerful business profile that wins grants. Let's start with a few questions:</p>
-                            <p><strong>Question 1 of 5:</strong> What is your primary industry or business focus?</p>
-                            <p style="font-size: 0.9rem; opacity: 0.8;">Examples: AI & Technology, Workforce Development, Healthcare, Clean Energy, Education, etc.</p>
-                        </div>
-                    </div>
+function showAIAssistant() {
+    console.log('AI Assistant launched');
+    document.getElementById('aiAssistantCard').style.display = 'block';
+    aiConversationStep = 1;
+    aiResponses = {};
+    selectedOptions = [];
+    
+    document.getElementById('aiConversation').innerHTML = `
+        <div class="ai-message">
+            <strong>AI Assistant:</strong>
+            <p>Hello! Let's create your grant-winning profile together.</p>
+            <p><strong>Question 1 of 5:</strong> What industries does your business focus on?</p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">Select ALL that apply - you can choose multiple, then click Continue</p>
+        </div>
+    `;
+    
+    document.getElementById('aiAssistantCard').scrollIntoView({ behavior: 'smooth' });
+    updateQuickResponses();
+}
 
-                    <div style="display: flex; gap: 1rem;">
-                        <input type="text" id="aiInput" placeholder="Type your answer here..." style="flex: 1; padding: 0.75rem; border: none; border-radius: 8px;">
-                        <button class="btn btn-primary" onclick="sendAIMessage()" style="background: white; color: #667eea;">Send</button>
-                    </div>
-
-                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;" id="quickResponses"></div>
-                </div>
-            </div>
-
-            <!-- Basic Business Information -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📋 Basic Business Information</h2>
-                </div>
-                <form id="businessProfileForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Legal Business Name *</label>
-                            <input type="text" id="legalBusinessName" required placeholder="Your Company LLC">
-                        </div>
-                        <div class="form-group">
-                            <label>DBA (Doing Business As)</label>
-                            <input type="text" id="dbaName" placeholder="If different from legal name">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Business Structure *</label>
-                            <select id="businessStructure" required>
-                                <option value="">Select structure</option>
-                                <option value="sole_proprietor">Sole Proprietor</option>
-                                <option value="llc">LLC</option>
-                                <option value="s_corp">S Corporation</option>
-                                <option value="c_corp">C Corporation</option>
-                                <option value="nonprofit">Non-Profit (501c3)</option>
-                                <option value="partnership">Partnership</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>EIN (Employer Identification Number)</label>
-                            <input type="text" id="ein" placeholder="XX-XXXXXXX">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Year Founded *</label>
-                            <input type="number" id="yearFounded" required min="1900" max="2025" placeholder="2024">
-                        </div>
-                        <div class="form-group">
-                            <label>Number of Employees *</label>
-                            <select id="employees" required>
-                                <option value="">Select range</option>
-                                <option value="1">Just me (1)</option>
-                                <option value="2-10">2-10 employees</option>
-                                <option value="11-50">11-50 employees</option>
-                                <option value="51-100">51-100 employees</option>
-                                <option value="100+">100+ employees</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Annual Revenue *</label>
-                            <select id="revenue" required>
-                                <option value="">Select range</option>
-                                <option value="0-50k">$0 - $50,000</option>
-                                <option value="50k-250k">$50,000 - $250,000</option>
-                                <option value="250k-1m">$250,000 - $1M</option>
-                                <option value="1m-5m">$1M - $5M</option>
-                                <option value="5m-10m">$5M - $10M</option>
-                                <option value="10m+">$10M+</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>DUNS Number (if applicable)</label>
-                            <input type="text" id="dunsNumber" placeholder="9-digit number">
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Location & Geographic Reach - NEW SECTION -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📍 Location & Geographic Reach</h2>
-                    <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0;">Define where you operate and who you serve</p>
-                </div>
-                
-                <h3 style="margin-bottom: 1rem;">Primary Business Location</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Street Address *</label>
-                        <input type="text" id="streetAddress" required placeholder="123 Main Street">
-                    </div>
-                    <div class="form-group">
-                        <label>City *</label>
-                        <input type="text" id="city" required placeholder="Chicago">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>State *</label>
-                        <input type="text" id="state" required placeholder="Illinois">
-                    </div>
-                    <div class="form-group">
-                        <label>County *</label>
-                        <input type="text" id="county" required placeholder="Will County">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>ZIP Code *</label>
-                        <input type="text" id="zipCode" required placeholder="60601">
-                    </div>
-                    <div class="form-group">
-                        <label>Congressional District</label>
-                        <input type="text" id="congressionalDistrict" placeholder="IL-11">
-                    </div>
-                </div>
-
-                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
-
-                <h3 style="margin-bottom: 1rem;">Geographic Reach & Target Market *</h3>
-                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 1rem;">
-                    Where do you serve customers? This helps match you with location-specific grants.
-                </p>
-
-                <div class="form-group">
-                    <label>Primary Geographic Reach *</label>
-                    <select id="geographicReach" required onchange="updateGeographicOptions()">
-                        <option value="">Select your reach</option>
-                        <option value="local">Local (City/County only)</option>
-                        <option value="regional">Regional (Multiple counties/metro area)</option>
-                        <option value="statewide">Statewide (Entire state)</option>
-                        <option value="multi-state">Multi-State (Several states)</option>
-                        <option value="nationwide">Nationwide (All 50 states)</option>
-                        <option value="international">International (Beyond US)</option>
-                    </select>
-                </div>
-
-                <div id="multiStateSection" style="display: none;">
-                    <div class="form-group">
-                        <label>Target States (Select all that apply)</label>
-                        <div class="checkbox-grid" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gray-200); padding: 1rem; border-radius: 8px;">
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Illinois"><span>Illinois</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Indiana"><span>Indiana</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Wisconsin"><span>Wisconsin</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Michigan"><span>Michigan</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Ohio"><span>Ohio</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Iowa"><span>Iowa</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Missouri"><span>Missouri</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Minnesota"><span>Minnesota</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Kentucky"><span>Kentucky</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="targetState" value="Other"><span>Other States</span></label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="servesRuralAreas" style="width: auto;">
-                            <span>We serve rural areas</span>
-                        </label>
-                        <small>Check if you serve rural or underserved communities (qualifies for additional grants)</small>
-                    </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="servesUrbanAreas" style="width: auto;">
-                            <span>We serve urban areas</span>
-                        </label>
-                        <small>Check if you serve cities and metropolitan areas</small>
-                    </div>
-                </div>
-
-                <div class="alert alert-info">
-                    <strong>💡 Grant Matching Tip:</strong> Your geographic reach determines which grants you qualify for. Nationwide reach opens federal grants, while local focus qualifies for community grants. Many businesses check both rural AND urban to maximize opportunities.
-                </div>
-            </div>
-
-            <!-- Industry & Focus Areas -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>🎯 Industry & Focus Areas</h2>
-                    <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0;">Select all that apply - this helps match you with relevant grants</p>
-                </div>
-                
-                <div class="form-group">
-                    <label>Primary Industry Categories *</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="AI & Technology">
-                            <span>🤖 AI & Technology</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Workforce Development">
-                            <span>👷 Workforce Development</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Education & Training">
-                            <span>🎓 Education & Training</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Entrepreneurship">
-                            <span>💼 Entrepreneurship</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Community Impact">
-                            <span>🌍 Community Impact</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Innovation">
-                            <span>💡 Innovation</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Healthcare">
-                            <span>🏥 Healthcare</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Clean Energy">
-                            <span>⚡ Clean Energy</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Manufacturing">
-                            <span>🏭 Manufacturing</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="industry" value="Agriculture">
-                            <span>🌾 Agriculture</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Target Audience / Beneficiaries *</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Displaced Workers">
-                            <span>👔 Displaced Workers</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Underemployed">
-                            <span>📊 Underemployed Individuals</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Aspiring Entrepreneurs">
-                            <span>🚀 Aspiring Entrepreneurs</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Small Businesses">
-                            <span>🏪 Small Businesses</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Veterans">
-                            <span>🎖️ Veterans</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Underserved Communities">
-                            <span>🤝 Underserved Communities</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Women-Owned">
-                            <span>👩‍💼 Women-Owned</span>
-                        </label>
-                        <label class="checkbox-card">
-                            <input type="checkbox" name="audience" value="Minority-Owned">
-                            <span>🌈 Minority-Owned</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Business Description (Grant-Optimized) -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📝 Business Description (Grant-Optimized)</h2>
-                </div>
-
-                <div class="alert alert-info">
-                    <strong>💡 Expert Tip:</strong> Your business description should clearly articulate your mission, impact, and unique value proposition. This will be used in grant applications.
-                </div>
-
-                <div class="form-group">
-                    <label>Mission Statement (1-2 sentences) *</label>
-                    <textarea id="missionStatement" rows="3" required placeholder="What is your core mission? Example: We empower displaced workers nationwide to build successful AI businesses through accessible training and business-in-a-box solutions."></textarea>
-                    <small>This appears in every grant application - make it compelling!</small>
-                </div>
-
-                <div class="form-group">
-                    <label>Problem You're Solving *</label>
-                    <textarea id="problemStatement" rows="4" required placeholder="What problem does your business address? Example: Rapid AI advancement is displacing workers across America while creating a skills gap. Many people feel intimidated by AI technology and lack accessible pathways to leverage it for income generation."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Your Solution *</label>
-                    <textarea id="solutionStatement" rows="4" required placeholder="How does your business solve this problem? Example: We provide affordable AI business-in-a-box packages ($150-$1000) that include prompt libraries, training materials, and step-by-step guidance, enabling anyone nationwide to start an AI-powered business."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Unique Value Proposition *</label>
-                    <textarea id="valueProposition" rows="3" required placeholder="What makes you different? Example: Unlike expensive AI courses, our business-in-a-box model provides everything needed to start earning immediately, with packages priced for accessibility and delivered digitally to serve customers nationwide."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Impact & Outcomes *</label>
-                    <textarea id="impactStatement" rows="4" required placeholder="What impact do you create? Example: We help individuals across the United States transition to AI-powered businesses, generating an average of $3,500/month in new income within 90 days. Our digital delivery model enables us to serve rural and urban communities equally."></textarea>
-                </div>
-            </div>
-
-            <!-- Products & Services -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📦 Products & Services</h2>
-                </div>
-
-                <div class="form-group">
-                    <label>Primary Products/Services *</label>
-                    <textarea id="productsServices" rows="4" required placeholder="List your main offerings. Example: 1) AI Prompt Package ($150) - 500+ tested prompts, 2) Business Starter Kit ($500) - Prompts + training + templates, 3) Complete Business Bundle ($1000) - Everything + 1-on-1 coaching"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Price Range *</label>
-                        <input type="text" id="priceRange" required placeholder="$150 - $1,000">
-                    </div>
-                    <div class="form-group">
-                        <label>Customers Served (to date)</label>
-                        <input type="number" id="customersServed" placeholder="50">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grant-Specific Information -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>💰 Grant-Specific Information</h2>
-                </div>
-
-                <div class="form-group">
-                    <label>How Will You Use Grant Funding? *</label>
-                    <textarea id="fundingUse" rows="5" required placeholder="Be specific about how grant funds will be used. Example: 1) Platform Development ($50K) - Build AI training platform, 2) Marketing ($25K) - Reach displaced workers nationwide, 3) Curriculum Development ($15K) - Create training materials, 4) Pilot Program ($10K) - Serve 100 participants across multiple states"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Measurable Outcomes & Metrics *</label>
-                    <textarea id="outcomes" rows="4" required placeholder="What measurable results will you achieve? Example: Train 500 displaced workers nationwide, 70% job placement rate, $2M in aggregate income generated for participants, serve 10+ states, 85% participant satisfaction rate"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Minimum Grant Amount Needed</label>
-                        <input type="number" id="minGrantAmount" placeholder="10000">
-                    </div>
-                    <div class="form-group">
-                        <label>Maximum Grant Amount Desired</label>
-                        <input type="number" id="maxGrantAmount" placeholder="500000">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Team & Credentials -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>👥 Team & Credentials</h2>
-                </div>
-
-                <div class="form-group">
-                    <label>Key Team Members & Expertise</label>
-                    <textarea id="teamMembers" rows="4" placeholder="List key team members and their relevant experience. Example: Jane Doe (Founder) - 10 years AI development, MBA; John Smith (COO) - 15 years workforce development; Dr. Sarah Johnson (Advisor) - PhD Computer Science, Stanford"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Certifications, Awards, & Recognition</label>
-                    <textarea id="credentials" rows="3" placeholder="List any relevant certifications, awards, or recognition. Example: SBA Emerging Leaders Graduate, Forbes 30 Under 30 Nominee, Certified Workforce Development Professional"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Previous Grant Experience</label>
-                    <textarea id="previousGrants" rows="3" placeholder="List any grants previously received. Example: AWS Activate Credits ($25K, 2024), Local Chamber Grant ($5K, 2023)"></textarea>
-                </div>
-            </div>
-
-            <!-- Partnerships & Collaborations -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>🤝 Partnerships & Collaborations</h2>
-                </div>
-
-                <div class="form-group">
-                    <label>Current Partners & Collaborators</label>
-                    <textarea id="partners" rows="4" placeholder="List organizations you partner with. Example: Will County Workforce Board, Local Community College, Illinois Small Business Development Center, 3 Fortune 500 companies (letters of support available)"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Letters of Support Available From</label>
-                    <textarea id="lettersOfSupport" rows="3" placeholder="Who can provide letters of support? Example: Will County Workforce Board Director, 5 satisfied customers, Local Chamber of Commerce President, State Representative"></textarea>
-                </div>
-            </div>
-
-            <!-- Social Impact & Community Benefit -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>🌍 Social Impact & Community Benefit</h2>
-                </div>
-
-                <div class="form-group">
-                    <label>Community Impact Statement *</label>
-                    <textarea id="communityImpact" rows="4" required placeholder="How does your business benefit the community? Example: We address the nationwide AI skills gap, particularly in communities affected by manufacturing decline and automation. Our digital model enables us to serve underserved rural areas alongside urban centers, creating economic opportunities where they're needed most."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Underserved Populations Served</label>
-                    <textarea id="underservedPopulations" rows="3" placeholder="Which underserved groups do you help? Example: Displaced workers (40%), underemployed individuals (30%), veterans (15%), single parents (15%)"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Long-Term Sustainability Plan</label>
-                    <textarea id="sustainability" rows="4" placeholder="How will your business sustain beyond grant funding? Example: Revenue from business packages ($150-1000), grant writing services for clients, white-label licensing to other regions, corporate training contracts, nationwide digital delivery model"></textarea>
-                </div>
-            </div>
-
-            <!-- Save Button -->
-            <div class="card">
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="previewProfile()">
-                        👁️ Preview Profile
-                    </button>
-                    <button class="btn btn-success btn-large" onclick="saveProfile()">
-                        💾 Save Complete Profile
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="database.js"></script>
-    <script src="app.js"></script>
-    <script>
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (!currentUser) {
-            window.location.href = 'login.html';
-        }
-
-        // AI Assistant State
-        let aiConversationStep = 1;
-        let aiResponses = {};
-
-        // AI Assistant Questions
-        const aiQuestions = [
-            {
-                step: 1,
-                question: "What is your primary industry or business focus?",
-                hint: "Examples: AI & Technology, Workforce Development, Healthcare, Clean Energy, Education",
-                field: "industry",
-                quickResponses: ["AI & Technology", "Workforce Development", "Education & Training", "Healthcare", "Clean Energy"]
-            },
-            {
-                step: 2,
-                question: "Who are your primary beneficiaries or target customers?",
-                hint: "Who benefits most from your business?",
-                field: "audience",
-                quickResponses: ["Displaced Workers", "Underemployed Individuals", "Aspiring Entrepreneurs", "Small Businesses", "Veterans"]
-            },
-            {
-                step: 3,
-                question: "What specific problem does your business solve?",
-                hint: "Be specific about the pain point you address",
-                field: "problem"
-            },
-            {
-                step: 4,
-                question: "What makes your solution unique or innovative?",
-                hint: "What sets you apart from competitors?",
-                field: "unique"
-            },
-            {
-                step: 5,
-                question: "What measurable impact have you created (or will you create)?",
-                hint: "Numbers, percentages, specific outcomes",
-                field: "impact"
-            }
-        ];
-
-        function showAIAssistant() {
-            document.getElementById('aiAssistantCard').style.display = 'block';
-            aiConversationStep = 1;
-            aiResponses = {};
+function updateQuickResponses() {
+    const currentQuestion = aiQuestions[aiConversationStep - 1];
+    const container = document.getElementById('quickResponses');
+    
+    if (currentQuestion.quickResponses) {
+        multiSelectMode = currentQuestion.multiSelect;
+        
+        if (multiSelectMode) {
+            // Multi-select mode with checkboxes
+            container.innerHTML = currentQuestion.quickResponses.map(response => `
+                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.2); color: white; padding: 0.75rem 1rem; border: 1px solid white; border-radius: 6px; cursor: pointer;">
+                    <input type="checkbox" value="${response}" onchange="toggleSelection('${response}')" style="width: auto; margin: 0;">
+                    <span>${response}</span>
+                </label>
+            `).join('');
             
-            // Reset conversation
-            document.getElementById('aiConversation').innerHTML = `
-                <div class="ai-message">
-                    <strong>AI Assistant:</strong>
-                    <p>Hello! I'm your AI Grant Writing Assistant. I'll help you create a powerful business profile that wins grants. Let's start with a few questions:</p>
-                    <p><strong>Question 1 of 5:</strong> What is your primary industry or business focus?</p>
-                    <p style="font-size: 0.9rem; opacity: 0.8;">Examples: AI & Technology, Workforce Development, Healthcare, Clean Energy, Education, etc.</p>
-                </div>
+            // Add Continue button for multi-select
+            container.innerHTML += `
+                <button onclick="submitMultiSelect()" style="background: white; color: #667eea; padding: 0.75rem 2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem;">
+                    Continue with Selected (${selectedOptions.length})
+                </button>
             `;
-            
-            // Scroll to AI assistant
-            document.getElementById('aiAssistantCard').scrollIntoView({ behavior: 'smooth' });
-            
-            // Show quick responses for first question
-            updateQuickResponses();
+        } else {
+            // Single select mode
+            container.innerHTML = currentQuestion.quickResponses.map(response => 
+                `<button onclick="selectQuickResponse('${response}')" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border: 1px solid white; border-radius: 6px; cursor: pointer;">${response}</button>`
+            ).join('');
         }
+    } else {
+        container.innerHTML = '';
+        multiSelectMode = false;
+    }
+}
 
-        function hideAIAssistant() {
-            document.getElementById('aiAssistantCard').style.display = 'none';
-        }
+function toggleSelection(option) {
+    if (selectedOptions.includes(option)) {
+        selectedOptions = selectedOptions.filter(o => o !== option);
+    } else {
+        selectedOptions.push(option);
+    }
+    
+    // Update button text
+    const button = document.querySelector('#quickResponses button[onclick="submitMultiSelect()"]');
+    if (button) {
+        button.textContent = `Continue with Selected (${selectedOptions.length})`;
+    }
+}
 
-        function updateQuickResponses() {
-            const currentQuestion = aiQuestions[aiConversationStep - 1];
-            const container = document.getElementById('quickResponses');
-            
-            if (currentQuestion.quickResponses) {
-                container.innerHTML = currentQuestion.quickResponses.map(response => 
-                    `<button class="btn btn-small btn-secondary" onclick="selectQuickResponse('${response}')" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">${response}</button>`
-                ).join('');
-            } else {
-                container.innerHTML = '';
-            }
-        }
+function submitMultiSelect() {
+    if (selectedOptions.length === 0) {
+        alert('Please select at least one option');
+        return;
+    }
+    
+    const message = selectedOptions.join(', ');
+    document.getElementById('aiInput').value = message;
+    sendAIMessage();
+    selectedOptions = [];
+}
 
-        function selectQuickResponse(response) {
-            document.getElementById('aiInput').value = response;
-            sendAIMessage();
-        }
+function selectQuickResponse(response) {
+    document.getElementById('aiInput').value = response;
+    sendAIMessage();
+}
 
-        function sendAIMessage() {
-            const input = document.getElementById('aiInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
+function sendAIMessage() {
+    const input = document.getElementById('aiInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
 
-            // Add user message to conversation
-            const conversation = document.getElementById('aiConversation');
+    const conversation = document.getElementById('aiConversation');
+    conversation.innerHTML += `
+        <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: right;">
+            <strong>You:</strong>
+            <p>${message}</p>
+        </div>
+    `;
+
+    const currentQuestion = aiQuestions[aiConversationStep - 1];
+    aiResponses[currentQuestion.field] = message;
+    input.value = '';
+    aiConversationStep++;
+
+    if (aiConversationStep <= aiQuestions.length) {
+        const nextQuestion = aiQuestions[aiConversationStep - 1];
+        setTimeout(() => {
             conversation.innerHTML += `
-                <div class="user-message" style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <strong>You:</strong>
-                    <p>${message}</p>
-                </div>
-            `;
-
-            // Store response
-            const currentQuestion = aiQuestions[aiConversationStep - 1];
-            aiResponses[currentQuestion.field] = message;
-
-            // Clear input
-            input.value = '';
-
-            // Move to next question or finish
-            aiConversationStep++;
-
-            if (aiConversationStep <= aiQuestions.length) {
-                // Show next question
-                const nextQuestion = aiQuestions[aiConversationStep - 1];
-                setTimeout(() => {
-                    conversation.innerHTML += `
-                        <div class="ai-message" style="margin: 1rem 0;">
-                            <strong>AI Assistant:</strong>
-                            <p><strong>Question ${aiConversationStep} of ${aiQuestions.length}:</strong> ${nextQuestion.question}</p>
-                            ${nextQuestion.hint ? `<p style="font-size: 0.9rem; opacity: 0.8;">${nextQuestion.hint}</p>` : ''}
-                        </div>
-                    `;
-                    conversation.scrollTop = conversation.scrollHeight;
-                    updateQuickResponses();
-                }, 500);
-            } else {
-                // Generate optimized profile
-                setTimeout(() => {
-                    generateOptimizedProfile();
-                }, 500);
-            }
-
-            conversation.scrollTop = conversation.scrollHeight;
-        }
-
-        function generateOptimizedProfile() {
-            const conversation = document.getElementById('aiConversation');
-            
-            conversation.innerHTML += `
-                <div class="ai-message" style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <div class="ai-message" style="margin: 1rem 0;">
                     <strong>AI Assistant:</strong>
-                    <p>✅ Perfect! I've analyzed your responses and created an optimized business profile. Here's what I've generated:</p>
-                    
-                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                        <h4 style="color: white; margin-bottom: 0.5rem;">🎯 Optimized Mission Statement:</h4>
-                        <p id="aiMission" style="font-style: italic;"></p>
-                        
-                        <h4 style="color: white; margin-top: 1rem; margin-bottom: 0.5rem;">💡 Problem Statement:</h4>
-                        <p id="aiProblem"></p>
-                        
-                        <h4 style="color: white; margin-top: 1rem; margin-bottom: 0.5rem;">✨ Solution Statement:</h4>
-                        <p id="aiSolution"></p>
-                        
-                        <h4 style="color: white; margin-top: 1rem; margin-bottom: 0.5rem;">🏆 Unique Value Proposition:</h4>
-                        <p id="aiValue"></p>
-                        
-                        <h4 style="color: white; margin-top: 1rem; margin-bottom: 0.5rem;">🌍 Impact Statement:</h4>
-                        <p id="aiImpact"></p>
-                    </div>
-                    
-                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
-                        <button class="btn btn-success" onclick="applyAIProfile()" style="flex: 1;">✅ Apply to Profile</button>
-                        <button class="btn btn-secondary" onclick="regenerateProfile()" style="flex: 1; background: rgba(255,255,255,0.2); color: white;">🔄 Regenerate</button>
-                    </div>
+                    <p><strong>Question ${aiConversationStep} of ${aiQuestions.length}:</strong> ${nextQuestion.question}</p>
+                    ${nextQuestion.hint ? `<p style="font-size: 0.9rem; opacity: 0.8;">${nextQuestion.hint}</p>` : ''}
                 </div>
             `;
-
-            // Generate optimized content based on responses
-            const optimized = optimizeProfileContent(aiResponses);
-            
-            document.getElementById('aiMission').textContent = optimized.mission;
-            document.getElementById('aiProblem').textContent = optimized.problem;
-            document.getElementById('aiSolution').textContent = optimized.solution;
-            document.getElementById('aiValue').textContent = optimized.value;
-            document.getElementById('aiImpact').textContent = optimized.impact;
-
             conversation.scrollTop = conversation.scrollHeight;
-        }
-
-        function optimizeProfileContent(responses) {
-            // Expert grant writing optimization
-            return {
-                mission: `We empower ${responses.audience || 'individuals'} to build successful businesses in ${responses.industry || 'emerging industries'} through accessible, affordable training and comprehensive business solutions that address ${responses.problem || 'critical market needs'}.`,
-                
-                problem: `${responses.problem || 'Many individuals face barriers to economic opportunity'}. This challenge is particularly acute for ${responses.audience || 'underserved populations'}, who lack access to ${responses.industry || 'industry-specific'} training and resources. The rapid pace of technological change has created a significant skills gap, leaving many qualified individuals unable to capitalize on emerging opportunities.`,
-                
-                solution: `Our ${responses.unique || 'innovative'} approach provides comprehensive business-in-a-box solutions that eliminate traditional barriers to entry. We offer affordable packages that include proven frameworks, training materials, and ongoing support, enabling participants to launch income-generating businesses quickly and sustainably.`,
-                
-                value: `Unlike traditional training programs that focus solely on skills development, we provide complete business infrastructure including ${responses.unique || 'proprietary tools'}, market-tested strategies, and continuous support. Our accessible pricing model ensures economic barriers don't prevent participation, while our proven success framework delivers measurable results.`,
-                
-                impact: `${responses.impact || 'We create measurable economic impact'} by transforming ${responses.audience || 'participants'} into successful entrepreneurs. Our model addresses multiple community needs simultaneously: reducing unemployment, building economic resilience, fostering innovation, and creating sustainable income opportunities. Each participant generates significant new income, contributing to local economic development and tax base growth.`
-            };
-        }
-
-        function applyAIProfile() {
-            // Apply AI-generated content to form fields
-            document.getElementById('missionStatement').value = document.getElementById('aiMission').textContent;
-            document.getElementById('problemStatement').value = document.getElementById('aiProblem').textContent;
-            document.getElementById('solutionStatement').value = document.getElementById('aiSolution').textContent;
-            document.getElementById('valueProposition').value = document.getElementById('aiValue').textContent;
-            document.getElementById('impactStatement').value = document.getElementById('aiImpact').textContent;
-
-            // Auto-check relevant industry checkboxes
-            if (aiResponses.industry) {
-                const industryCheckboxes = document.querySelectorAll('input[name="industry"]');
-                industryCheckboxes.forEach(cb => {
-                    if (aiResponses.industry.toLowerCase().includes(cb.value.toLowerCase())) {
-                        cb.checked = true;
-                    }
-                });
-            }
-
-            // Auto-check relevant audience checkboxes
-            if (aiResponses.audience) {
-                const audienceCheckboxes = document.querySelectorAll('input[name="audience"]');
-                audienceCheckboxes.forEach(cb => {
-                    if (aiResponses.audience.toLowerCase().includes(cb.value.toLowerCase())) {
-                        cb.checked = true;
-                    }
-                });
-            }
-
-            alert('✅ AI-optimized profile applied! Review and customize as needed, then click "Save Complete Profile".');
-            hideAIAssistant();
-            
-            // Scroll to top of form
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Update completion progress
-            calculateCompletion();
-        }
-
-        function regenerateProfile() {
-            aiConversationStep = 1;
-            aiResponses = {};
-            document.getElementById('aiConversation').innerHTML = `
-                <div class="ai-message">
-                    <strong>AI Assistant:</strong>
-                    <p>Let's try again! I'll help you create an even better profile.</p>
-                    <p><strong>Question 1 of 5:</strong> What is your primary industry or business focus?</p>
-                </div>
-            `;
             updateQuickResponses();
-        }
+        }, 500);
+    } else {
+        setTimeout(() => generateOptimizedProfile(), 500);
+    }
 
-        function updateGeographicOptions() {
-            const reach = document.getElementById('geographicReach').value;
-            const multiStateSection = document.getElementById('multiStateSection');
-            
-            if (reach === 'multi-state') {
-                multiStateSection.style.display = 'block';
-            } else {
-                multiStateSection.style.display = 'none';
-            }
-        }
+    conversation.scrollTop = conversation.scrollHeight;
+}
 
-        function saveProfile() {
-            // Collect all form data
-            const profileData = {
-                // Basic Information
-                legalBusinessName: document.getElementById('legalBusinessName').value,
-                dbaName: document.getElementById('dbaName').value,
-                businessStructure: document.getElementById('businessStructure').value,
-                ein: document.getElementById('ein').value,
-                yearFounded: document.getElementById('yearFounded').value,
-                employees: document.getElementById('employees').value,
-                revenue: document.getElementById('revenue').value,
-                dunsNumber: document.getElementById('dunsNumber').value,
-                
-                // Location
-                streetAddress: document.getElementById('streetAddress').value,
-                city: document.getElementById('city').value,
-                state: document.getElementById('state').value,
-                county: document.getElementById('county').value,
-                zipCode: document.getElementById('zipCode').value,
-                congressionalDistrict: document.getElementById('congressionalDistrict').value,
-                
-                // Geographic Reach - NEW
-                geographicReach: document.getElementById('geographicReach').value,
-                targetStates: Array.from(document.querySelectorAll('input[name="targetState"]:checked')).map(cb => cb.value),
-                servesRuralAreas: document.getElementById('servesRuralAreas').checked,
-                servesUrbanAreas: document.getElementById('servesUrbanAreas').checked,
-                
-                // Industry & Focus
-                industries: Array.from(document.querySelectorAll('input[name="industry"]:checked')).map(cb => cb.value),
-                audiences: Array.from(document.querySelectorAll('input[name="audience"]:checked')).map(cb => cb.value),
-                
-                // Business Description
-                missionStatement: document.getElementById('missionStatement').value,
-                problemStatement: document.getElementById('problemStatement').value,
-                solutionStatement: document.getElementById('solutionStatement').value,
-                valueProposition: document.getElementById('valueProposition').value,
-                impactStatement: document.getElementById('impactStatement').value,
-                
-                // Products & Services
-                productsServices: document.getElementById('productsServices').value,
-                priceRange: document.getElementById('priceRange').value,
-                customersServed: document.getElementById('customersServed').value,
-                
-                // Grant-Specific
-                fundingUse: document.getElementById('fundingUse').value,
-                outcomes: document.getElementById('outcomes').value,
-                minGrantAmount: document.getElementById('minGrantAmount').value,
-                maxGrantAmount: document.getElementById('maxGrantAmount').value,
-                
-                // Team & Credentials
-                teamMembers: document.getElementById('teamMembers').value,
-                credentials: document.getElementById('credentials').value,
-                previousGrants: document.getElementById('previousGrants').value,
-                
-                // Partnerships
-                partners: document.getElementById('partners').value,
-                lettersOfSupport: document.getElementById('lettersOfSupport').value,
-                
-                // Social Impact
-                communityImpact: document.getElementById('communityImpact').value,
-                underservedPopulations: document.getElementById('underservedPopulations').value,
-                sustainability: document.getElementById('sustainability').value,
-                
-                // Metadata
-                userId: currentUser.email,
-                isComplete: true,
-                completionPercentage: calculateCompletion(),
-                lastUpdated: new Date().toISOString()
-            };
-
-            // Validate required fields
-            const requiredFields = [
-                'legalBusinessName', 'businessStructure', 'yearFounded', 'employees', 'revenue',
-                'streetAddress', 'city', 'state', 'county', 'zipCode', 'geographicReach',
-                'missionStatement', 'problemStatement', 'solutionStatement', 'valueProposition', 'impactStatement',
-                'productsServices', 'priceRange', 'fundingUse', 'outcomes', 'communityImpact'
-            ];
-
-            const missingFields = requiredFields.filter(field => !profileData[field]);
-            
-            if (missingFields.length > 0) {
-                alert('⚠️ Please complete all required fields marked with *');
-                return;
-            }
-
-            if (profileData.industries.length === 0) {
-                alert('⚠️ Please select at least one industry category');
-                return;
-            }
-
-            if (profileData.audiences.length === 0) {
-                alert('⚠️ Please select at least one target audience');
-                return;
-            }
-
-            // Save to localStorage
-            localStorage.setItem('businessProfile_' + currentUser.email, JSON.stringify(profileData));
-            
-            // Show success message
-            alert('✅ Business Profile Saved Successfully!\n\n' +
-                  'Your profile is now ' + profileData.completionPercentage + '% complete.\n\n' +
-                  'Geographic Reach: ' + profileData.geographicReach + '\n\n' +
-                  'This information will be used to:\n' +
-                  '• Match you with relevant grants (federal, state, local)\n' +
-                  '• Auto-generate application packages\n' +
-                  '• Calculate success predictions\n' +
-                  '• Personalize your grant recommendations');
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
-        }
-
-        function calculateCompletion() {
-            const totalFields = 32; // Updated total
-            let completedFields = 0;
-
-            // Check each field
-            const fields = [
-                'legalBusinessName', 'businessStructure', 'yearFounded', 'employees', 'revenue',
-                'streetAddress', 'city', 'state', 'county', 'zipCode', 'geographicReach',
-                'missionStatement', 'problemStatement', 'solutionStatement', 'valueProposition', 'impactStatement',
-                'productsServices', 'priceRange', 'fundingUse', 'outcomes', 'communityImpact'
-            ];
-
-            fields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element && element.value) completedFields++;
-            });
-
-            // Check checkboxes
-            if (document.querySelectorAll('input[name="industry"]:checked').length > 0) completedFields++;
-            if (document.querySelectorAll('input[name="audience"]:checked').length > 0) completedFields++;
-            if (document.getElementById('servesRuralAreas').checked || document.getElementById('servesUrbanAreas').checked) completedFields++;
-
-            const percentage = Math.round((completedFields / totalFields) * 100);
-            
-            // Update progress bar
-            const progressBar = document.getElementById('completionProgress');
-            const progressText = document.getElementById('completionText');
-            
-            if (progressBar) {
-                progressBar.style.width = percentage + '%';
-            }
-            if (progressText) {
-                progressText.textContent = percentage + '% Complete';
-            }
-
-            return percentage;
-        }
-
-        function previewProfile() {
-            const profileData = {
-                legalBusinessName: document.getElementById('legalBusinessName').value,
-                missionStatement: document.getElementById('missionStatement').value,
-                geographicReach: document.getElementById('geographicReach').value,
-                industries: Array.from(document.querySelectorAll('input[name="industry"]:checked')).map(cb => cb.value),
-                audiences: Array.from(document.querySelectorAll('input[name="audience"]:checked')).map(cb => cb.value)
-            };
-
-            const preview = `
-Business Name: ${profileData.legalBusinessName || 'Not provided'}
-
-Mission: ${profileData.missionStatement || 'Not provided'}
-
-Geographic Reach: ${profileData.geographicReach || 'Not selected'}
-
-Industries: ${profileData.industries.join(', ') || 'None selected'}
-
-Target Audience: ${profileData.audiences.join(', ') || 'None selected'}
-
-Completion: ${calculateCompletion()}%
-            `;
-
-            alert('📋 Profile Preview:\n\n' + preview);
-        }
-
-        function loadExistingProfile() {
-            const savedProfile = JSON.parse(localStorage.getItem('businessProfile_' + currentUser.email) || 'null');
-            
-            if (!savedProfile) {
-                calculateCompletion();
-                return;
-            }
-
-            // Populate all fields (same as before, plus new geographic fields)
-            document.getElementById('legalBusinessName').value = savedProfile.legalBusinessName || '';
-            document.getElementById('dbaName').value = savedProfile.dbaName || '';
-            document.getElementById('businessStructure').value = savedProfile.businessStructure || '';
-            document.getElementById('ein').value = savedProfile.ein || '';
-            document.getElementById('yearFounded').value = savedProfile.yearFounded || '';
-            document.getElementById('employees').value = savedProfile.employees || '';
-            document.getElementById('revenue').value = savedProfile.revenue || '';
-            document.getElementById('dunsNumber').value = savedProfile.dunsNumber || '';
-            
-            document.getElementById('streetAddress').value = savedProfile.streetAddress || '';
-            document.getElementById('city').value = savedProfile.city || '';
-            document.getElementById('state').value = savedProfile.state || '';
-            document.getElementById('county').value = savedProfile.county || '';
-            document.getElementById('zipCode').value = savedProfile.zipCode || '';
-            document.getElementById('congressionalDistrict').value = savedProfile.congressionalDistrict || '';
-            
-            // Geographic reach - NEW
-            document.getElementById('geographicReach').value = savedProfile.geographicReach || '';
-            document.getElementById('servesRuralAreas').checked = savedProfile.servesRuralAreas || false;
-            document.getElementById('servesUrbanAreas').checked = savedProfile.servesUrbanAreas || false;
-            
-            if (savedProfile.geographicReach === 'multi-state') {
-                document.getElementById('multiStateSection').style.display = 'block';
-                if (savedProfile.targetStates) {
-                    savedProfile.targetStates.forEach(state => {
-                        const checkbox = document.querySelector(`input[name="targetState"][value="${state}"]`);
-                        if (checkbox) checkbox.checked = true;
-                    });
-                }
-            }
-            
-            document.getElementById('missionStatement').value = savedProfile.missionStatement || '';
-            document.getElementById('problemStatement').value = savedProfile.problemStatement || '';
-            document.getElementById('solutionStatement').value = savedProfile.solutionStatement || '';
-            document.getElementById('valueProposition').value = savedProfile.valueProposition || '';
-            document.getElementById('impactStatement').value = savedProfile.impactStatement || '';
-            
-            document.getElementById('productsServices').value = savedProfile.productsServices || '';
-            document.getElementById('priceRange').value = savedProfile.priceRange || '';
-            document.getElementById('customersServed').value = savedProfile.customersServed || '';
-            
-            document.getElementById('fundingUse').value = savedProfile.fundingUse || '';
-            document.getElementById('outcomes').value = savedProfile.outcomes || '';
-            document.getElementById('minGrantAmount').value = savedProfile.minGrantAmount || '';
-            document.getElementById('maxGrantAmount').value = savedProfile.maxGrantAmount || '';
-            
-            document.getElementById('teamMembers').value = savedProfile.teamMembers || '';
-            document.getElementById('credentials').value = savedProfile.credentials || '';
-            document.getElementById('previousGrants').value = savedProfile.previousGrants || '';
-            
-            document.getElementById('partners').value = savedProfile.partners || '';
-            document.getElementById('lettersOfSupport').value = savedProfile.lettersOfSupport || '';
-            
-            document.getElementById('communityImpact').value = savedProfile.communityImpact || '';
-            document.getElementById('underservedPopulations').value = savedProfile.underservedPopulations || '';
-            document.getElementById('sustainability').value = savedProfile.sustainability || '';
-
-            // Check industries
-            if (savedProfile.industries) {
-                savedProfile.industries.forEach(industry => {
-                    const checkbox = document.querySelector(`input[name="industry"][value="${industry}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-
-            // Check audiences
-            if (savedProfile.audiences) {
-                savedProfile.audiences.forEach(audience => {
-                    const checkbox = document.querySelector(`input[name="audience"][value="${audience}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-
-            calculateCompletion();
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('currentUser');
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Add event listeners for real-time completion tracking
-        document.querySelectorAll('input, select, textarea').forEach(element => {
-            element.addEventListener('change', calculateCompletion);
-            element.addEventListener('input', calculateCompletion);
-        });
-
-        // Allow Enter key to send AI messages
-        document.getElementById('aiInput')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendAIMessage();
-            }
-        });
-
-        // Initialize
-        loadExistingProfile();
-    </script>
-</body>
-</html>
+// Rest of the AI functions remain the same...
+</script>
