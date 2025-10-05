@@ -1,189 +1,888 @@
-<!-- Add this in the <script> section, replace the existing AI functions -->
-
-<script>
-// Enhanced AI Assistant with multi-select
-let aiConversationStep = 1;
-let aiResponses = {};
-let multiSelectMode = false;
-let selectedOptions = [];
-
-const aiQuestions = [
-    {
-        step: 1,
-        question: "What industries does your business focus on?",
-        hint: "Select ALL that apply - you can choose multiple",
-        field: "industry",
-        multiSelect: true,
-        quickResponses: [
-            "AI & Technology",
-            "Workforce Development", 
-            "Education & Training",
-            "Healthcare",
-            "Clean Energy",
-            "Entrepreneurship"
-        ]
-    },
-    {
-        step: 2,
-        question: "Who are your primary beneficiaries?",
-        hint: "Select ALL that apply - you can choose multiple",
-        field: "audience",
-        multiSelect: true,
-        quickResponses: [
-            "Displaced Workers",
-            "Underemployed",
-            "Aspiring Entrepreneurs",
-            "Small Businesses",
-            "Veterans",
-            "Underserved Communities"
-        ]
-    },
-    {
-        step: 3,
-        question: "What specific problem does your business solve?",
-        hint: "Describe the main challenge you address",
-        field: "problem",
-        multiSelect: false
-    },
-    {
-        step: 4,
-        question: "What makes your solution unique?",
-        hint: "What sets you apart from competitors?",
-        field: "unique",
-        multiSelect: false
-    },
-    {
-        step: 5,
-        question: "What measurable impact have you created?",
-        hint: "Numbers, percentages, specific outcomes",
-        field: "impact",
-        multiSelect: false
-    }
-];
-
-function showAIAssistant() {
-    console.log('AI Assistant launched');
-    document.getElementById('aiAssistantCard').style.display = 'block';
-    aiConversationStep = 1;
-    aiResponses = {};
-    selectedOptions = [];
-    
-    document.getElementById('aiConversation').innerHTML = `
-        <div class="ai-message">
-            <strong>AI Assistant:</strong>
-            <p>Hello! Let's create your grant-winning profile together.</p>
-            <p><strong>Question 1 of 5:</strong> What industries does your business focus on?</p>
-            <p style="font-size: 0.9rem; opacity: 0.8;">Select ALL that apply - you can choose multiple, then click Continue</p>
-        </div>
-    `;
-    
-    document.getElementById('aiAssistantCard').scrollIntoView({ behavior: 'smooth' });
-    updateQuickResponses();
-}
-
-function updateQuickResponses() {
-    const currentQuestion = aiQuestions[aiConversationStep - 1];
-    const container = document.getElementById('quickResponses');
-    
-    if (currentQuestion.quickResponses) {
-        multiSelectMode = currentQuestion.multiSelect;
-        
-        if (multiSelectMode) {
-            // Multi-select mode with checkboxes
-            container.innerHTML = currentQuestion.quickResponses.map(response => `
-                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.2); color: white; padding: 0.75rem 1rem; border: 1px solid white; border-radius: 6px; cursor: pointer;">
-                    <input type="checkbox" value="${response}" onchange="toggleSelection('${response}')" style="width: auto; margin: 0;">
-                    <span>${response}</span>
-                </label>
-            `).join('');
-            
-            // Add Continue button for multi-select
-            container.innerHTML += `
-                <button onclick="submitMultiSelect()" style="background: white; color: #667eea; padding: 0.75rem 2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem;">
-                    Continue with Selected (${selectedOptions.length})
-                </button>
-            `;
-        } else {
-            // Single select mode
-            container.innerHTML = currentQuestion.quickResponses.map(response => 
-                `<button onclick="selectQuickResponse('${response}')" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border: 1px solid white; border-radius: 6px; cursor: pointer;">${response}</button>`
-            ).join('');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Grants - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .grant-card {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-    } else {
-        container.innerHTML = '';
-        multiSelectMode = false;
-    }
-}
+        
+        .grant-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 2rem;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .insight-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+        
+        .match-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .match-factor {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--success);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="business-profile.html" class="nav-item">
+                    <span class="icon">🏢</span> Business Profile
+                </a>
+                <a href="grants.html" class="nav-item active">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="icon">👤</span> Account Settings
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
 
-function toggleSelection(option) {
-    if (selectedOptions.includes(option)) {
-        selectedOptions = selectedOptions.filter(o => o !== option);
-    } else {
-        selectedOptions.push(option);
-    }
-    
-    // Update button text
-    const button = document.querySelector('#quickResponses button[onclick="submitMultiSelect()"]');
-    if (button) {
-        button.textContent = `Continue with Selected (${selectedOptions.length})`;
-    }
-}
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Browse Grants</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportGrants()">
+                        📥 Export List
+                    </button>
+                </div>
+            </header>
 
-function submitMultiSelect() {
-    if (selectedOptions.length === 0) {
-        alert('Please select at least one option');
-        return;
-    }
-    
-    const message = selectedOptions.join(', ');
-    document.getElementById('aiInput').value = message;
-    sendAIMessage();
-    selectedOptions = [];
-}
+            <!-- Search and Filters -->
+            <div class="card">
+                <div class="search-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <input type="text" id="searchInput" placeholder="Search grants..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--gray-200); border-radius: 8px;">
+                    <button class="btn btn-primary" onclick="searchGrants()">Search</button>
+                </div>
 
-function selectQuickResponse(response) {
-    document.getElementById('aiInput').value = response;
-    sendAIMessage();
-}
+                <div class="filters-bar">
+                    <select id="typeFilter" onchange="filterGrants()">
+                        <option value="all">All Types</option>
+                        <option value="Federal">Federal</option>
+                        <option value="State">State</option>
+                        <option value="Corporate">Corporate</option>
+                    </select>
 
-function sendAIMessage() {
-    const input = document.getElementById('aiInput');
-    const message = input.value.trim();
-    
-    if (!message) return;
+                    <select id="amountFilter" onchange="filterGrants()">
+                        <option value="all">All Amounts</option>
+                        <option value="small">Under $50K</option>
+                        <option value="medium">$50K - $500K</option>
+                        <option value="large">Over $500K</option>
+                    </select>
 
-    const conversation = document.getElementById('aiConversation');
-    conversation.innerHTML += `
-        <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: right;">
-            <strong>You:</strong>
-            <p>${message}</p>
+                    <select id="matchFilter" onchange="filterGrants()">
+                        <option value="all">All Grants</option>
+                        <option value="perfect">Perfect Matches (85%+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grants Grid -->
+            <div id="grantsContainer"></div>
+        </main>
+    </div>
+
+    <!-- Grant Insights Modal -->
+    <div id="insightsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="insightsTitle">Grant Insights</h2>
+                <button onclick="closeInsights()" style="background: none; border: none; font-size: 2rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="insightsBody">
+                <!-- Content loaded dynamically -->
+            </div>
         </div>
-    `;
+    </div>
 
-    const currentQuestion = aiQuestions[aiConversationStep - 1];
-    aiResponses[currentQuestion.field] = message;
-    input.value = '';
-    aiConversationStep++;
+    <!-- Package Generator Modal -->
+    <div id="packageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📦 Generate Application Package</h2>
+                <button onclick="closePackage()" style="background: none; border: none; font-size: 2rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="packageBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
 
-    if (aiConversationStep <= aiQuestions.length) {
-        const nextQuestion = aiQuestions[aiConversationStep - 1];
-        setTimeout(() => {
-            conversation.innerHTML += `
-                <div class="ai-message" style="margin: 1rem 0;">
-                    <strong>AI Assistant:</strong>
-                    <p><strong>Question ${aiConversationStep} of ${aiQuestions.length}:</strong> ${nextQuestion.question}</p>
-                    ${nextQuestion.hint ? `<p style="font-size: 0.9rem; opacity: 0.8;">${nextQuestion.hint}</p>` : ''}
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        let allGrants = [];
+        let currentGrant = null;
+
+        async function loadGrants() {
+            try {
+                const response = await fetch('grants_database.json');
+                const data = await response.json();
+                allGrants = [];
+                
+                for (let category in data) {
+                    allGrants = allGrants.concat(data[category]);
+                }
+                
+                console.log('Loaded grants:', allGrants.length);
+                displayGrants(allGrants);
+            } catch (error) {
+                console.error('Error loading grants:', error);
+                document.getElementById('grantsContainer').innerHTML = '<p style="color: red;">Error loading grants. Please refresh.</p>';
+            }
+        }
+
+        function displayGrants(grants) {
+            const container = document.getElementById('grantsContainer');
+            
+            if (grants.length === 0) {
+                container.innerHTML = '<div class="empty-state">No grants found matching your criteria.</div>';
+                return;
+            }
+
+            container.innerHTML = grants.map(grant => `
+                <div class="grant-card" style="border-left-color: ${grant.perfect_for_your_business ? 'var(--success)' : 'var(--primary)'};">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem;">${grant.name}</h3>
+                            <p style="color: var(--gray-600); font-size: 0.9rem;">${grant.provider}</p>
+                        </div>
+                        <div>
+                            ${grant.perfect_for_your_business ? '<span class="status-badge status-awarded">✨ Perfect Match</span>' : ''}
+                            <span class="status-badge status-in-progress">${grant.type}</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">
+                        $${grant.amount_min.toLocaleString()} - $${grant.amount_max.toLocaleString()}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <div>
+                            <span style="color: var(--gray-600);">📅 Deadline:</span>
+                            <strong>${grant.deadline}</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-600);">🎯 Match:</span>
+                            <strong>${grant.alignment_score || 'N/A'}%</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray-600);">📊 Success Rate:</span>
+                            <strong>${grant.success_rate || 'N/A'}</strong>
+                        </div>
+                    </div>
+
+                    ${grant.why_perfect ? `
+                        <div style="background: #f0fdf4; border-left: 3px solid var(--success); padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+                            <strong style="color: var(--success);">💡 Why This is Perfect:</strong> ${grant.why_perfect}
+                        </div>
+                    ` : ''}
+
+                    <div class="grant-actions">
+                        <a href="${grant.application_url}" target="_blank" class="btn btn-primary">Apply Now →</a>
+                        <button class="btn btn-secondary" onclick='showGrantInsights(${JSON.stringify(grant).replace(/'/g, "&#39;")})'>📊 Grant Insights</button>
+                        <button class="btn btn-success" onclick='generatePackage(${JSON.stringify(grant).replace(/'/g, "&#39;")})'>📦 Generate Package</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showGrantInsights(grant) {
+            currentGrant = grant;
+            const profile = JSON.parse(localStorage.getItem('businessProfile_' + currentUser.email) || '{}');
+            
+            document.getElementById('insightsTitle').textContent = grant.name + ' - Insights';
+            
+            // Calculate match breakdown
+            const matchFactors = calculateMatchBreakdown(grant, profile);
+            
+            document.getElementById('insightsBody').innerHTML = `
+                <div class="insight-section">
+                    <h3>🎯 Match Score Breakdown: ${grant.alignment_score}%</h3>
+                    <div class="match-breakdown">
+                        ${matchFactors.map(factor => `
+                            <div class="match-factor">
+                                <div style="font-size: 0.875rem; color: var(--gray-600);">${factor.name}</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">${factor.score}%</div>
+                                <div style="font-size: 0.875rem; margin-top: 0.25rem;">${factor.reason}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>✅ Eligibility Checklist</h3>
+                    ${grant.eligibility ? grant.eligibility.map(req => `
+                        <div class="checklist-item">
+                            <span style="color: var(--success); font-weight: bold;">✓</span>
+                            <span>${req}</span>
+                        </div>
+                    `).join('') : '<p>No specific eligibility requirements listed</p>'}
+                </div>
+
+                <div class="insight-section">
+                    <h3>📋 Required Documents</h3>
+                    ${grant.key_requirements ? grant.key_requirements.map(req => `
+                        <div class="checklist-item">
+                            <span style="color: var(--primary);">📄</span>
+                            <span>${req}</span>
+                        </div>
+                    `).join('') : '<p>Standard business documents required</p>'}
+                </div>
+
+                <div class="insight-section">
+                    <h3>💡 Success Tips</h3>
+                    ${grant.tips ? grant.tips.map(tip => `
+                        <div class="checklist-item">
+                            <span style="color: var(--warning);">💡</span>
+                            <span>${tip}</span>
+                        </div>
+                    `).join('') : '<p>Complete your business profile for personalized tips</p>'}
+                </div>
+
+                <div class="insight-section">
+                    <h3>📊 Competition Analysis</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <div>
+                            <strong>Success Rate:</strong> ${grant.success_rate || 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Avg Award:</strong> $${grant.avg_award ? grant.avg_award.toLocaleString() : 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Competition:</strong> ${grant.competition_level || 'Medium'}
+                        </div>
+                        <div>
+                            <strong>Application Time:</strong> ${grant.application_time || '40-60 hours'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>⏱️ Application Timeline</h3>
+                    <p><strong>Next Deadline:</strong> ${grant.next_deadline || grant.deadline}</p>
+                    <p><strong>Recurring:</strong> ${grant.recurring || 'Check website'}</p>
+                    <p><strong>Estimated Prep Time:</strong> ${grant.application_time || '40-60 hours'}</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="window.open('${grant.application_url}', '_blank')">Apply Now →</button>
+                    <button class="btn btn-success" onclick="generatePackage(currentGrant)">Generate Package</button>
+                    <button class="btn btn-secondary" onclick="exportInsights()">📥 Export Report</button>
                 </div>
             `;
-            conversation.scrollTop = conversation.scrollHeight;
-            updateQuickResponses();
-        }, 500);
-    } else {
-        setTimeout(() => generateOptimizedProfile(), 500);
-    }
+            
+            document.getElementById('insightsModal').style.display = 'flex';
+        }
 
-    conversation.scrollTop = conversation.scrollHeight;
-}
+        function calculateMatchBreakdown(grant, profile) {
+            const factors = [];
+            
+            // Industry match
+            if (profile.industries && grant.category) {
+                const industryMatch = profile.industries.some(ind => 
+                    grant.category.some(cat => cat.toLowerCase().includes(ind.toLowerCase()))
+                );
+                factors.push({
+                    name: 'Industry Alignment',
+                    score: industryMatch ? 95 : 60,
+                    reason: industryMatch ? 'Perfect industry match' : 'Partial industry match'
+                });
+            }
+            
+            // Geographic match
+            if (profile.geographicReach) {
+                const geoScore = grant.type === 'Federal' && profile.geographicReach === 'nationwide' ? 100 :
+                                grant.type === 'State' && profile.state ? 95 :
+                                grant.type === 'Local' ? 90 : 70;
+                factors.push({
+                    name: 'Geographic Fit',
+                    score: geoScore,
+                    reason: geoScore >= 90 ? 'Excellent geographic match' : 'Good geographic fit'
+                });
+            }
+            
+            // Audience match
+            if (profile.audiences && grant.perfect_for) {
+                factors.push({
+                    name: 'Target Audience',
+                    score: 90,
+                    reason: 'Serves your target beneficiaries'
+                });
+            }
+            
+            // Funding amount match
+            if (profile.minGrantAmount && profile.maxGrantAmount) {
+                const amountMatch = grant.amount_max >= profile.minGrantAmount && 
+                                   grant.amount_min <= profile.maxGrantAmount;
+                factors.push({
+                    name: 'Funding Amount',
+                    score: amountMatch ? 100 : 75,
+                    reason: amountMatch ? 'Perfect funding range' : 'Acceptable funding range'
+                });
+            }
+            
+            return factors;
+        }
 
-// Rest of the AI functions remain the same...
-</script>
+        function generatePackage(grant) {
+            currentGrant = grant;
+            const profile = JSON.parse(localStorage.getItem('businessProfile_' + currentUser.email) || '{}');
+            
+            if (!profile.isComplete) {
+                alert('⚠️ Please complete your business profile first to generate a customized application package.');
+                window.location.href = 'business-profile.html';
+                return;
+            }
+            
+            document.getElementById('packageBody').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                    <h3>Generating Your Application Package...</h3>
+                    <p style="color: var(--gray-600); margin: 1rem 0;">
+                        Creating customized documents based on your business profile
+                    </p>
+                    <div class="progress-bar" style="height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden; margin: 2rem 0;">
+                        <div class="progress-fill" style="height: 100%; background: var(--success); width: 0%; transition: width 2s;" id="packageProgress"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('packageModal').style.display = 'flex';
+            
+            // Simulate package generation
+            setTimeout(() => {
+                document.getElementById('packageProgress').style.width = '100%';
+            }, 100);
+            
+            setTimeout(() => {
+                showGeneratedPackage(grant, profile);
+            }, 2000);
+        }
+
+        function showGeneratedPackage(grant, profile) {
+            const packageContent = `
+                <div class="insight-section">
+                    <h3>✅ Your Application Package is Ready!</h3>
+                    <p>We've pre-filled all documents with your business profile information.</p>
+                </div>
+
+                <div class="insight-section">
+                    <h3>📄 Package Contents</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>1. Executive Summary</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Pre-filled with your mission and impact</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('executive-summary')">Download</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>2. Project Narrative</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Problem, solution, and impact statements</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('narrative')">Download</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>3. Budget Template</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Customized for ${grant.name}</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('budget')">Download</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>4. Work Plan & Timeline</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">12-month implementation schedule</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('workplan')">Download</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>5. Letters of Support Template</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Ready to send to partners</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('letters')">Download</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid var(--gray-200);">
+                            <div>
+                                <strong>6. Document Checklist</strong>
+                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Complete requirements list</p>
+                            </div>
+                            <button class="btn btn-small btn-primary" onclick="downloadDocument('checklist')">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-section">
+                    <h3>📝 Pre-Filled Information</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>✅ Business name: ${profile.legalBusinessName}</li>
+                        <li>✅ Mission statement: ${profile.missionStatement?.substring(0, 100)}...</li>
+                        <li>✅ Geographic reach: ${profile.geographicReach}</li>
+                        <li>✅ Target audience: ${profile.audiences?.join(', ')}</li>
+                        <li>✅ Funding use: ${profile.fundingUse?.substring(0, 100)}...</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-success btn-large" onclick="downloadAllPackage()">📥 Download Complete Package (ZIP)</button>
+                    <button class="btn btn-secondary" onclick="closePackage()">Close</button>
+                </div>
+            `;
+            
+            document.getElementById('packageBody').innerHTML = packageContent;
+        }
+
+        function downloadDocument(docType) {
+            const profile = JSON.parse(localStorage.getItem('businessProfile_' + currentUser.email) || '{}');
+            
+            let content = '';
+            let filename = '';
+            
+            switch(docType) {
+                case 'executive-summary':
+                    content = generateExecutiveSummary(currentGrant, profile);
+                    filename = 'executive-summary.txt';
+                    break;
+                case 'narrative':
+                    content = generateNarrative(currentGrant, profile);
+                    filename = 'project-narrative.txt';
+                    break;
+                case 'budget':
+                    content = generateBudget(currentGrant, profile);
+                    filename = 'budget-template.txt';
+                    break;
+                case 'workplan':
+                    content = generateWorkPlan(currentGrant, profile);
+                    filename = 'work-plan.txt';
+                    break;
+                case 'letters':
+                    content = generateLetterTemplate(currentGrant, profile);
+                    filename = 'letter-of-support-template.txt';
+                    break;
+                case 'checklist':
+                    content = generateChecklist(currentGrant, profile);
+                    filename = 'document-checklist.txt';
+                    break;
+            }
+            
+            downloadFile(content, filename, 'text/plain');
+            alert('✅ Document downloaded! Check your Downloads folder.');
+        }
+
+        function generateExecutiveSummary(grant, profile) {
+            return `EXECUTIVE SUMMARY
+${grant.name}
+${profile.legalBusinessName}
+
+ORGANIZATION OVERVIEW
+${profile.missionStatement}
+
+PROBLEM STATEMENT
+${profile.problemStatement}
+
+PROPOSED SOLUTION
+${profile.solutionStatement}
+
+UNIQUE VALUE PROPOSITION
+${profile.valueProposition}
+
+EXPECTED IMPACT
+${profile.impactStatement}
+
+FUNDING REQUEST
+Amount Requested: $${grant.amount_max.toLocaleString()}
+Project Duration: 12 months
+Geographic Reach: ${profile.geographicReach}
+
+TARGET BENEFICIARIES
+${profile.audiences?.join(', ')}
+
+ORGANIZATIONAL CAPACITY
+${profile.teamMembers || 'Experienced team with proven track record'}
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function generateNarrative(grant, profile) {
+            return `PROJECT NARRATIVE
+${grant.name}
+${profile.legalBusinessName}
+
+1. NEED/PROBLEM STATEMENT
+${profile.problemStatement}
+
+2. PROJECT DESCRIPTION
+${profile.solutionStatement}
+
+3. GOALS AND OBJECTIVES
+${profile.outcomes}
+
+4. METHODS AND STRATEGIES
+${profile.fundingUse}
+
+5. EVALUATION PLAN
+${profile.outcomes}
+
+6. SUSTAINABILITY
+${profile.sustainability || 'Long-term sustainability through diverse revenue streams and community partnerships'}
+
+7. ORGANIZATIONAL CAPACITY
+Team: ${profile.teamMembers || 'Experienced leadership team'}
+Partners: ${profile.partners || 'Strong community partnerships'}
+
+8. BUDGET JUSTIFICATION
+See attached budget template for detailed breakdown.
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function generateBudget(grant, profile) {
+            const totalAmount = grant.amount_max;
+            return `BUDGET TEMPLATE
+${grant.name}
+${profile.legalBusinessName}
+
+Total Grant Request: $${totalAmount.toLocaleString()}
+
+PERSONNEL (40% - $${(totalAmount * 0.4).toLocaleString()})
+- Project Director: $${(totalAmount * 0.15).toLocaleString()}
+- Program Manager: $${(totalAmount * 0.12).toLocaleString()}
+- Staff Salaries: $${(totalAmount * 0.13).toLocaleString()}
+
+PROGRAM EXPENSES (35% - $${(totalAmount * 0.35).toLocaleString()})
+- Training Materials: $${(totalAmount * 0.10).toLocaleString()}
+- Technology/Software: $${(totalAmount * 0.10).toLocaleString()}
+- Marketing/Outreach: $${(totalAmount * 0.10).toLocaleString()}
+- Participant Support: $${(totalAmount * 0.05).toLocaleString()}
+
+OPERATIONS (15% - $${(totalAmount * 0.15).toLocaleString()})
+- Facilities: $${(totalAmount * 0.08).toLocaleString()}
+- Equipment: $${(totalAmount * 0.07).toLocaleString()}
+
+INDIRECT COSTS (10% - $${(totalAmount * 0.10).toLocaleString()})
+- Administrative overhead
+
+TOTAL: $${totalAmount.toLocaleString()}
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function generateWorkPlan(grant, profile) {
+            return `WORK PLAN & TIMELINE
+${grant.name}
+${profile.legalBusinessName}
+
+MONTH 1-3: PLANNING & SETUP
+- Finalize partnerships
+- Hire staff
+- Develop curriculum
+- Set up infrastructure
+
+MONTH 4-6: PILOT PHASE
+- Launch pilot program
+- Recruit initial participants
+- Deliver training
+- Collect feedback
+
+MONTH 7-9: EXPANSION
+- Scale to full capacity
+- Refine based on feedback
+- Expand partnerships
+- Increase marketing
+
+MONTH 10-12: EVALUATION & SUSTAINABILITY
+- Complete evaluation
+- Document outcomes
+- Plan for sustainability
+- Prepare final report
+
+KEY MILESTONES
+✓ Month 3: Program launch
+✓ Month 6: 50 participants served
+✓ Month 9: 100 participants served
+✓ Month 12: Final evaluation complete
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function generateLetterTemplate(grant, profile) {
+            return `LETTER OF SUPPORT TEMPLATE
+${grant.name}
+
+[Date]
+
+[Grantor Name]
+[Grantor Address]
+
+Dear Grant Review Committee,
+
+I am writing to express my strong support for ${profile.legalBusinessName}'s application for ${grant.name}.
+
+As [Your Title] at [Your Organization], I have had the opportunity to [describe relationship with applicant organization].
+
+${profile.legalBusinessName} is addressing a critical need in our community: ${profile.problemStatement}
+
+Their innovative approach of ${profile.solutionStatement} has the potential to create significant impact.
+
+I am particularly impressed by:
+- Their commitment to serving ${profile.audiences?.join(', ')}
+- Their proven track record of ${profile.impactStatement}
+- Their sustainable business model
+
+I strongly endorse this application and believe ${profile.legalBusinessName} is well-positioned to successfully implement this project.
+
+Please feel free to contact me if you need additional information.
+
+Sincerely,
+
+[Signature]
+[Name]
+[Title]
+[Organization]
+[Contact Information]
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function generateChecklist(grant, profile) {
+            return `DOCUMENT CHECKLIST
+${grant.name}
+${profile.legalBusinessName}
+
+REQUIRED DOCUMENTS:
+☐ Completed application form
+☐ Executive summary (1-2 pages)
+☐ Project narrative (5-10 pages)
+☐ Detailed budget
+☐ Budget justification
+☐ Work plan/timeline
+☐ Letters of support (3-5)
+☐ IRS determination letter (501c3 if applicable)
+☐ Board of directors list
+☐ Financial statements (last 2 years)
+☐ Organizational chart
+☐ Resumes of key personnel
+☐ Logic model or theory of change
+
+ELIGIBILITY REQUIREMENTS:
+${grant.eligibility ? grant.eligibility.map(req => `☐ ${req}`).join('\n') : '☐ Check grant guidelines'}
+
+SUBMISSION REQUIREMENTS:
+☐ Submit by deadline: ${grant.next_deadline || grant.deadline}
+☐ Follow formatting guidelines
+☐ Include all required attachments
+☐ Obtain necessary signatures
+☐ Keep copy for records
+
+TIPS FOR SUCCESS:
+${grant.tips ? grant.tips.map(tip => `• ${tip}`).join('\n') : '• Review all guidelines carefully\n• Start early\n• Get feedback before submitting'}
+
+Generated by AI Grant Finder Pro
+Date: ${new Date().toLocaleDateString()}
+`;
+        }
+
+        function downloadAllPackage() {
+            alert('📦 Complete package download feature coming soon!\n\nFor now, download each document individually.\n\nIn the production version, this will create a ZIP file with all documents.');
+        }
+
+        function exportInsights() {
+            const content = document.getElementById('insightsBody').innerText;
+            downloadFile(content, `grant-insights-${currentGrant.id}.txt`, 'text/plain');
+            alert('✅ Grant insights exported!');
+        }
+
+        function closeInsights() {
+            document.getElementById('insightsModal').style.display = 'none';
+        }
+
+        function closePackage() {
+            document.getElementById('packageModal').style.display = 'none';
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function searchGrants() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allGrants.filter(grant => 
+                grant.name.toLowerCase().includes(searchTerm) ||
+                grant.provider.toLowerCase().includes(searchTerm) ||
+                grant.category.some(cat => cat.toLowerCase().includes(searchTerm))
+            );
+            displayGrants(filtered);
+        }
+
+        function filterGrants() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const amountFilter = document.getElementById('amountFilter').value;
+            const matchFilter = document.getElementById('matchFilter').value;
+
+            let filtered = allGrants;
+
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(g => g.type === typeFilter);
+            }
+
+            if (amountFilter !== 'all') {
+                filtered = filtered.filter(g => {
+                    if (amountFilter === 'small') return g.amount_max < 50000;
+                    if (amountFilter === 'medium') return g.amount_max >= 50000 && g.amount_max <= 500000;
+                    if (amountFilter === 'large') return g.amount_max > 500000;
+                });
+            }
+
+            if (matchFilter === 'perfect') {
+                filtered = filtered.filter(g => g.alignment_score >= 85);
+            }
+
+            displayGrants(filtered);
+        }
+
+        function exportGrants() {
+            const csv = allGrants.map(g => ({
+                'Grant Name': g.name,
+                'Provider': g.provider,
+                'Type': g.type,
+                'Min Amount': g.amount_min,
+                'Max Amount': g.amount_max,
+                'Deadline': g.deadline,
+                'Match Score': g.alignment_score + '%',
+                'Application URL': g.application_url
+            }));
+            
+            const csvContent = convertArrayToCSV(csv);
+            downloadFile(csvContent, 'grants-list.csv', 'text/csv');
+        }
+
+        function convertArrayToCSV(data) {
+            const headers = Object.keys(data[0]);
+            const rows = data.map(obj => headers.map(header => obj[header] || ''));
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        loadGrants();
+    </script>
+</body>
+</html>
