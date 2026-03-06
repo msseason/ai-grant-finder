@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="grants.html" class="nav-item">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item active">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>My Profile</h1>
+            </header>
+
+            <!-- Account Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Account Information</h2>
+                </div>
+                <form id="profileForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" disabled style="background: var(--gray-100);">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phone" placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Business Description</label>
+                        <textarea id="businessDescription" rows="4" placeholder="Describe your business and how you help people..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Subscription Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Subscription</h2>
+                </div>
+                <div id="subscriptionInfo">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Current Plan</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);" id="currentPlan"></div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Status</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;" id="accountStatus"></div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">Member Since</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;" id="memberSince"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="pricing.html" class="btn btn-secondary">Change Plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Members -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Team Members</h2>
+                    <button class="btn btn-primary" onclick="showAddTeamMemberModal()">+ Add Team Member</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Applications</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamMembersTable">
+                            <tr>
+                                <td colspan="6" class="empty-state">Loading team members...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Email Preferences -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Email Preferences</h2>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="checkbox" id="weeklyDigest" checked>
+                        <span>Weekly grant digest (every Monday)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="checkbox" id="deadlineAlerts" checked>
+                        <span>Deadline alerts (2 weeks before)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="checkbox" id="newGrantAlerts" checked>
+                        <span>New grant notifications</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="checkbox" id="teamUpdates" checked>
+                        <span>Team activity updates</span>
+                    </label>
+                </div>
+                <button class="btn btn-primary" onclick="saveEmailPreferences()" style="margin-top: 1rem;">Save Preferences</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Team Member Modal -->
+    <div id="teamMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Team Member</h2>
+                <button class="modal-close" onclick="closeTeamModal()">&times;</button>
+            </div>
+            <form id="teamMemberForm" class="modal-body">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="teamMemberName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="teamMemberEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select id="teamMemberRole" required>
+                        <option value="member">Team Member</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeTeamModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Invitation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Load profile data
+        function loadProfile() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            document.getElementById('fullName').value = currentUser.fullName;
+            document.getElementById('email').value = currentUser.email;
+            document.getElementById('companyName').value = currentUser.companyName;
+            document.getElementById('phone').value = currentUser.phone || '';
+            document.getElementById('businessDescription').value = currentUser.businessDescription || '';
+
+            // Subscription info
+            document.getElementById('currentPlan').textContent = currentUser.plan.charAt(0).toUpperCase() + currentUser.plan.slice(1);
+            document.getElementById('accountStatus').textContent = currentUser.status.charAt(0).toUpperCase() + currentUser.status.slice(1);
+            document.getElementById('memberSince').textContent = new Date(currentUser.createdAt).toLocaleDateString();
+
+            // Load team members
+            loadTeamMembers();
+        }
+
+        function loadTeamMembers() {
+            const tbody = document.getElementById('teamMembersTable');
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            
+            // For demo, show current user as team member
+            const teamMembers = [{
+                name: currentUser.fullName,
+                email: currentUser.email,
+                role: currentUser.role,
+                applications: applications.filter(app => app.userId === currentUser.email).length,
+                joined: currentUser.createdAt
+            }];
+
+            tbody.innerHTML = teamMembers.map(member => `
+                <tr>
+                    <td><strong>${member.name}</strong></td>
+                    <td>${member.email}</td>
+                    <td><span class="plan-badge plan-${member.role}">${member.role}</span></td>
+                    <td>${member.applications}</td>
+                    <td>${new Date(member.joined).toLocaleDateString()}</td>
+                    <td>
+                        ${member.email !== currentUser.email ? '<button class="btn btn-small btn-danger">Remove</button>' : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Save profile
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const updatedUser = {
+                ...currentUser,
+                fullName: document.getElementById('fullName').value,
+                companyName: document.getElementById('companyName').value,
+                phone: document.getElementById('phone').value,
+                businessDescription: document.getElementById('businessDescription').value,
+                updatedAt: new Date().toISOString()
+            };
+
+            // Update in users array
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const index = users.findIndex(u => u.email === currentUser.email);
+            if (index !== -1) {
+                users[index] = updatedUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            }
+
+            alert('✅ Profile updated successfully!');
+        });
+
+        function saveEmailPreferences() {
+            const preferences = {
+                weeklyDigest: document.getElementById('weeklyDigest').checked,
+                deadlineAlerts: document.getElementById('deadlineAlerts').checked,
+                newGrantAlerts: document.getElementById('newGrantAlerts').checked,
+                teamUpdates: document.getElementById('teamUpdates').checked
+            };
+
+            localStorage.setItem('emailPreferences_' + currentUser.email, JSON.stringify(preferences));
+            alert('✅ Email preferences saved!');
+        }
+
+        function showAddTeamMemberModal() {
+            document.getElementById('teamMemberModal').style.display = 'flex';
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamMemberModal').style.display = 'none';
+        }
+
+        document.getElementById('teamMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('✅ Team member invitation sent! They will receive an email to join your account.');
+            closeTeamModal();
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        loadProfile();
+    </script>
+</body>
+</html>

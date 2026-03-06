@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar (same as dashboard) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Grant Finder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="grants.html" class="nav-item">
+                    <span class="icon">🔍</span> Browse Grants
+                </a>
+                <a href="applications.html" class="nav-item active">
+                    <span class="icon">📝</span> My Applications
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span> Reports
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>My Grant Applications</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportApplications()">
+                        📥 Export
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddApplicationModal()">
+                        + Add Application
+                    </button>
+                </div>
+            </header>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <select id="statusFilter" onchange="filterApplications()">
+                    <option value="all">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="under-review">Under Review</option>
+                    <option value="awarded">Awarded</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+
+                <select id="assigneeFilter" onchange="filterApplications()">
+                    <option value="all">All Team Members</option>
+                </select>
+
+                <input type="text" id="searchFilter" placeholder="Search applications..." onkeyup="filterApplications()">
+            </div>
+
+            <!-- Applications Table -->
+            <div class="card">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Grant Name</th>
+                                <th>Provider</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Deadline</th>
+                                <th>Assigned To</th>
+                                <th>Award Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsTable">
+                            <tr>
+                                <td colspan="8" class="empty-state">Loading applications...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Application Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Application</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="applicationForm" class="modal-body">
+                <div class="form-group">
+                    <label>Grant Name *</label>
+                    <input type="text" id="grantName" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Provider *</label>
+                        <input type="text" id="provider" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount *</label>
+                        <input type="number" id="amount" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="status" required>
+                            <option value="draft">Draft</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="under-review">Under Review</option>
+                            <option value="awarded">Awarded</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline *</label>
+                        <input type="date" id="deadline" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign To</label>
+                    <select id="assignedTo">
+                        <option value="">Unassigned</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Award Amount (if awarded)</label>
+                    <input type="number" id="awardAmount" placeholder="Enter amount if grant was awarded">
+                </div>
+
+                <div class="form-group">
+                    <label>Notes/Feedback</label>
+                    <textarea id="notes" rows="4" placeholder="Add any notes, feedback, or next steps..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        let editingApplicationId = null;
+
+        function loadApplications() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const userApplications = applications.filter(app => app.userId === currentUser.email);
+            
+            displayApplications(userApplications);
+            loadTeamMembers();
+        }
+
+        function displayApplications(applications) {
+            const tbody = document.getElementById('applicationsTable');
+            
+            if (applications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            No applications yet. Click "Add Application" to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = applications.map(app => `
+                <tr>
+                    <td><strong>${app.grantName}</strong></td>
+                    <td>${app.provider}</td>
+                    <td>$${app.amount.toLocaleString()}</td>
+                    <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                    <td>${new Date(app.deadline).toLocaleDateString()}</td>
+                    <td>${app.assignedTo || 'Unassigned'}</td>
+                    <td>${app.awardAmount ? '$' + app.awardAmount.toLocaleString() : '-'}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="editApplication('${app.id}')">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteApplication('${app.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterApplications() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const assigneeFilter = document.getElementById('assigneeFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            let filtered = applications.filter(app => app.userId === currentUser.email);
+
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(app => app.status === statusFilter);
+            }
+
+            if (assigneeFilter !== 'all') {
+                filtered = filtered.filter(app => app.assignedTo === assigneeFilter);
+            }
+
+            if (searchFilter) {
+                filtered = filtered.filter(app => 
+                    app.grantName.toLowerCase().includes(searchFilter) ||
+                    app.provider.toLowerCase().includes(searchFilter)
+                );
+            }
+
+            displayApplications(filtered);
+        }
+
+        function showAddApplicationModal() {
+            editingApplicationId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Application';
+            document.getElementById('applicationForm').reset();
+            document.getElementById('applicationModal').style.display = 'flex';
+        }
+
+        function editApplication(id) {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const app = applications.find(a => a.id === id);
+            
+            if (!app) return;
+
+            editingApplicationId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Application';
+            document.getElementById('grantName').value = app.grantName;
+            document.getElementById('provider').value = app.provider;
+            document.getElementById('amount').value = app.amount;
+            document.getElementById('status').value = app.status;
+            document.getElementById('deadline').value = app.deadline;
+            document.getElementById('assignedTo').value = app.assignedTo || '';
+            document.getElementById('awardAmount').value = app.awardAmount || '';
+            document.getElementById('notes').value = app.notes || '';
+            
+            document.getElementById('applicationModal').style.display = 'flex';
+        }
+
+        function deleteApplication(id) {
+            if (!confirm('Are you sure you want to delete this application?')) return;
+
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const filtered = applications.filter(app => app.id !== id);
+            localStorage.setItem('applications', JSON.stringify(filtered));
+            
+            loadApplications();
+        }
+
+        function closeModal() {
+            document.getElementById('applicationModal').style.display = 'none';
+        }
+
+        function loadTeamMembers() {
+            // In a real app, this would load team members from the database
+            const assignedToSelect = document.getElementById('assignedTo');
+            const assigneeFilter = document.getElementById('assigneeFilter');
+            
+            const teamMembers = [currentUser.fullName];
+            
+            assignedToSelect.innerHTML = '<option value="">Unassigned</option>' + 
+                teamMembers.map(member => `<option value="${member}">${member}</option>`).join('');
+            
+            assigneeFilter.innerHTML = '<option value="all">All Team Members</option>' +
+                teamMembers.map(member => `<option value="${member}">${member}</option>`).join('');
+        }
+
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const applicationData = {
+                id: editingApplicationId || 'app_' + Date.now(),
+                userId: currentUser.email,
+                grantName: document.getElementById('grantName').value,
+                provider: document.getElementById('provider').value,
+                amount: parseInt(document.getElementById('amount').value),
+                status: document.getElementById('status').value,
+                deadline: document.getElementById('deadline').value,
+                assignedTo: document.getElementById('assignedTo').value,
+                awardAmount: parseInt(document.getElementById('awardAmount').value) || null,
+                notes: document.getElementById('notes').value,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            
+            if (editingApplicationId) {
+                const index = applications.findIndex(app => app.id === editingApplicationId);
+                applications[index] = applicationData;
+            } else {
+                applications.push(applicationData);
+            }
+
+            localStorage.setItem('applications', JSON.stringify(applications));
+            
+            closeModal();
+            loadApplications();
+        });
+
+        function exportApplications() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const userApplications = applications.filter(app => app.userId === currentUser.email);
+            
+            const csv = convertToCSV(userApplications);
+            downloadCSV(csv, 'grant-applications-' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        function convertToCSV(data) {
+            const headers = ['Grant Name', 'Provider', 'Amount', 'Status', 'Deadline', 'Assigned To', 'Award Amount', 'Notes'];
+            const rows = data.map(app => [
+                app.grantName,
+                app.provider,
+                app.amount,
+                app.status,
+                app.deadline,
+                app.assignedTo || '',
+                app.awardAmount || '',
+                app.notes || ''
+            ]);
+            
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        loadApplications();
+    </script>
+</body>
+</html>

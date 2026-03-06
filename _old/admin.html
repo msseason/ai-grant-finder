@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AI Grant Finder Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🔧 Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin.html" class="nav-item active">
+                    <span class="icon">📊</span> Overview
+                </a>
+                <a href="#users" class="nav-item" onclick="showSection('users')">
+                    <span class="icon">👥</span> Users
+                </a>
+                <a href="#applications" class="nav-item" onclick="showSection('applications')">
+                    <span class="icon">📝</span> All Applications
+                </a>
+                <a href="#revenue" class="nav-item" onclick="showSection('revenue')">
+                    <span class="icon">💰</span> Revenue
+                </a>
+                <a href="#analytics" class="nav-item" onclick="showSection('analytics')">
+                    <span class="icon">📈</span> Analytics
+                </a>
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">👤</span> User View
+                </a>
+                <a href="#" onclick="logout()" class="nav-item">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Admin Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportAllData()">
+                        📥 Export All Data
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshData()">
+                        🔄 Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- Admin Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-change positive" id="newUsersThisMonth">+0 this month</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Applications</div>
+                        <div class="stat-value" id="totalApps">0</div>
+                        <div class="stat-change positive" id="newAppsThisMonth">+0 this month</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Monthly Revenue</div>
+                        <div class="stat-value" id="monthlyRevenue">$0</div>
+                        <div class="stat-change positive">MRR</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Grants Awarded</div>
+                        <div class="stat-value" id="totalAwarded">0</div>
+                        <div class="stat-change positive" id="totalAwardedAmount">$0 total</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview-section">
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div class="activity-list" id="recentActivity">
+                        <div class="empty-state">Loading activity...</div>
+                    </div>
+                </div>
+
+                <!-- Plan Distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Plan Distribution</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="planChart"></canvas>
+                        <div id="planDistribution"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>All Users</h2>
+                        <input type="text" id="userSearch" placeholder="Search users..." onkeyup="filterUsers()">
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Company</th>
+                                    <th>Plan</th>
+                                    <th>Status</th>
+                                    <th>Applications</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="8" class="empty-state">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications Section -->
+            <div id="applications-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>All Applications</h2>
+                        <div class="filters-bar">
+                            <select id="adminStatusFilter" onchange="filterAdminApplications()">
+                                <option value="all">All Status</option>
+                                <option value="draft">Draft</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="awarded">Awarded</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Grant Name</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                    <th>Assigned To</th>
+                                    <th>Award Amount</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminApplicationsTable">
+                                <tr>
+                                    <td colspan="8" class="empty-state">Loading applications...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Section -->
+            <div id="revenue-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Revenue Analytics</h2>
+                    </div>
+                    <div class="revenue-grid">
+                        <div class="revenue-card">
+                            <h3>Monthly Recurring Revenue</h3>
+                            <div class="revenue-amount" id="mrr">$0</div>
+                            <div class="revenue-breakdown" id="mrrBreakdown"></div>
+                        </div>
+                        <div class="revenue-card">
+                            <h3>Annual Recurring Revenue</h3>
+                            <div class="revenue-amount" id="arr">$0</div>
+                        </div>
+                        <div class="revenue-card">
+                            <h3>Average Revenue Per User</h3>
+                            <div class="revenue-amount" id="arpu">$0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Success Analytics</h2>
+                    </div>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Overall Success Rate</h3>
+                            <div class="analytics-value" id="overallSuccessRate">0%</div>
+                            <p>Across all users</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Average Grant Amount</h3>
+                            <div class="analytics-value" id="avgGrantAmount">$0</div>
+                            <p>Per application</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Total Funding Won</h3>
+                            <div class="analytics-value" id="totalFundingWon">$0</div>
+                            <p>By all users</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Check if user is admin
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'admin') {
+            // Create admin account if it doesn't exist
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (!users.find(u => u.email === 'admin@grantfinder.com')) {
+                users.push({
+                    fullName: 'Admin User',
+                    email: 'admin@grantfinder.com',
+                    password: 'admin123',
+                    companyName: 'Grant Finder Pro',
+                    plan: 'enterprise',
+                    role: 'admin',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Admin account created!\nEmail: admin@grantfinder.com\nPassword: admin123');
+                window.location.href = 'login.html';
+            } else {
+                alert('Access denied. Admin login required.');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function loadAdminDashboard() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+
+            // Update stats
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalApps').textContent = applications.length;
+
+            // Calculate revenue
+            const planPrices = { starter: 49, professional: 99, enterprise: 299 };
+            const activeUsers = users.filter(u => u.status === 'active' || u.status === 'trial');
+            const mrr = activeUsers.reduce((sum, user) => sum + (planPrices[user.plan] || 0), 0);
+            document.getElementById('monthlyRevenue').textContent = '$' + mrr.toLocaleString();
+            
+            // Calculate awarded grants
+            const awarded = applications.filter(app => app.status === 'awarded');
+            document.getElementById('totalAwarded').textContent = awarded.length;
+            const totalAwarded = awarded.reduce((sum, app) => sum + (app.awardAmount || 0), 0);
+            document.getElementById('totalAwardedAmount').textContent = '$' + totalAwarded.toLocaleString() + ' total';
+
+            // Load sections
+            loadRecentActivity();
+            loadPlanDistribution();
+            loadUsersTable();
+            loadAdminApplications();
+            loadRevenueAnalytics();
+            loadSuccessAnalytics();
+        }
+
+        function loadRecentActivity() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            
+            const activities = [];
+            
+            // Add user signups
+            users.slice(-5).forEach(user => {
+                activities.push({
+                    type: 'signup',
+                    text: `${user.fullName} signed up for ${user.plan} plan`,
+                    time: user.createdAt
+                });
+            });
+
+            // Add recent applications
+            applications.slice(-5).forEach(app => {
+                const user = users.find(u => u.email === app.userId);
+                activities.push({
+                    type: 'application',
+                    text: `${user?.fullName || 'User'} ${app.status === 'awarded' ? 'won' : 'applied for'} ${app.grantName}`,
+                    time: app.createdAt
+                });
+            });
+
+            // Sort by time
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = activities.slice(0, 10).map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">${activity.type === 'signup' ? '👤' : '📝'}</div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.text}</div>
+                        <div class="activity-time">${new Date(activity.time).toLocaleString()}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPlanDistribution() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const plans = { starter: 0, professional: 0, enterprise: 0 };
+            
+            users.forEach(user => {
+                if (plans.hasOwnProperty(user.plan)) {
+                    plans[user.plan]++;
+                }
+            });
+
+            const container = document.getElementById('planDistribution');
+            container.innerHTML = `
+                <div class="plan-stats">
+                    <div class="plan-stat">
+                        <span class="plan-name">Starter</span>
+                        <span class="plan-count">${plans.starter} users</span>
+                        <span class="plan-revenue">$${plans.starter * 49}/mo</span>
+                    </div>
+                    <div class="plan-stat">
+                        <span class="plan-name">Professional</span>
+                        <span class="plan-count">${plans.professional} users</span>
+                        <span class="plan-revenue">$${plans.professional * 99}/mo</span>
+                    </div>
+                    <div class="plan-stat">
+                        <span class="plan-name">Enterprise</span>
+                        <span class="plan-count">${plans.enterprise} users</span>
+                        <span class="plan-revenue">$${plans.enterprise * 299}/mo</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadUsersTable() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const tbody = document.getElementById('usersTable');
+
+            tbody.innerHTML = users.map(user => {
+                const userApps = applications.filter(app => app.userId === user.email);
+                return `
+                    <tr>
+                        <td><strong>${user.fullName}</strong></td>
+                        <td>${user.email}</td>
+                        <td>${user.companyName}</td>
+                        <td><span class="plan-badge plan-${user.plan}">${user.plan}</span></td>
+                        <td><span class="status-badge status-${user.status}">${user.status}</span></td>
+                        <td>${userApps.length}</td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-small" onclick="viewUserDetails('${user.email}')">View</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadAdminApplications() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const tbody = document.getElementById('adminApplicationsTable');
+
+            tbody.innerHTML = applications.map(app => {
+                const user = users.find(u => u.email === app.userId);
+                return `
+                    <tr>
+                        <td>${user?.fullName || 'Unknown'}</td>
+                        <td><strong>${app.grantName}</strong></td>
+                        <td>$${app.amount.toLocaleString()}</td>
+                        <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                        <td>${new Date(app.deadline).toLocaleDateString()}</td>
+                        <td>${app.assignedTo || '-'}</td>
+                        <td>${app.awardAmount ? '$' + app.awardAmount.toLocaleString() : '-'}</td>
+                        <td>${new Date(app.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadRevenueAnalytics() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const planPrices = { starter: 49, professional: 99, enterprise: 299 };
+            
+            const activeUsers = users.filter(u => u.status === 'active' || u.status === 'trial');
+            const mrr = activeUsers.reduce((sum, user) => sum + (planPrices[user.plan] || 0), 0);
+            const arr = mrr * 12;
+            const arpu = activeUsers.length > 0 ? mrr / activeUsers.length : 0;
+
+            document.getElementById('mrr').textContent = '$' + mrr.toLocaleString();
+            document.getElementById('arr').textContent = '$' + arr.toLocaleString();
+            document.getElementById('arpu').textContent = '$' + arpu.toFixed(2);
+
+            // MRR Breakdown
+            const breakdown = {
+                starter: users.filter(u => u.plan === 'starter' && (u.status === 'active' || u.status === 'trial')).length * 49,
+                professional: users.filter(u => u.plan === 'professional' && (u.status === 'active' || u.status === 'trial')).length * 99,
+                enterprise: users.filter(u => u.plan === 'enterprise' && (u.status === 'active' || u.status === 'trial')).length * 299
+            };
+
+            document.getElementById('mrrBreakdown').innerHTML = `
+                <div>Starter: $${breakdown.starter}</div>
+                <div>Professional: $${breakdown.professional}</div>
+                <div>Enterprise: $${breakdown.enterprise}</div>
+            `;
+        }
+
+        function loadSuccessAnalytics() {
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            
+            const awarded = applications.filter(app => app.status === 'awarded');
+            const successRate = applications.length > 0 ? (awarded.length / applications.length * 100).toFixed(1) : 0;
+            const avgAmount = applications.length > 0 ? applications.reduce((sum, app) => sum + app.amount, 0) / applications.length : 0;
+            const totalFunding = awarded.reduce((sum, app) => sum + (app.awardAmount || 0), 0);
+
+            document.getElementById('overallSuccessRate').textContent = successRate + '%';
+            document.getElementById('avgGrantAmount').textContent = '$' + avgAmount.toLocaleString();
+            document.getElementById('totalFundingWon').textContent = '$' + totalFunding.toLocaleString();
+        }
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(el => el.style.display = 'none');
+            
+            // Show selected section
+            document.getElementById(section + '-section').style.display = 'block';
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        function filterUsers() {
+            const search = document.getElementById('userSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+
+        function filterAdminApplications() {
+            const status = document.getElementById('adminStatusFilter').value;
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            let filtered = applications;
+            if (status !== 'all') {
+                filtered = applications.filter(app => app.status === status);
+            }
+
+            const tbody = document.getElementById('adminApplicationsTable');
+            tbody.innerHTML = filtered.map(app => {
+                const user = users.find(u => u.email === app.userId);
+                return `
+                    <tr>
+                        <td>${user?.fullName || 'Unknown'}</td>
+                        <td><strong>${app.grantName}</strong></td>
+                        <td>$${app.amount.toLocaleString()}</td>
+                        <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                        <td>${new Date(app.deadline).toLocaleDateString()}</td>
+                        <td>${app.assignedTo || '-'}</td>
+                        <td>${app.awardAmount ? '$' + app.awardAmount.toLocaleString() : '-'}</td>
+                        <td>${new Date(app.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportAllData() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            
+            const data = {
+                users: users,
+                applications: applications,
+                exportedAt: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'grant-finder-data-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        function refreshData() {
+            loadAdminDashboard();
+            alert('✅ Data refreshed!');
+        }
+
+        function viewUserDetails(email) {
+            alert('User details view coming soon for: ' + email);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        loadAdminDashboard();
+    </script>
+</body>
+</html>

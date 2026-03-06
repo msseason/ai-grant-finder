@@ -1,0 +1,96 @@
+{
+  "NSF_SBIR": {
+    "grantor_name": "National Science Foundation - SBIR/STTR",
+    "grantor_id": "NSF_SBIR",
+    "total_awards_2020_2024": 1247,
+    "total_funding": 1091250000,
+    "average_award": 875000,
+    "median_award": 750000,
+    "success_rate": 18.5,
+    "application_volume": 6740,
+    "award_range": {
+      "phase_1_min": 50000,
+      "phase_1_max": 275000,
+      "phase_1_avg": 256000,
+      "phase_2_min": 750000,
+      "phase_2_max": 1800000,
+      "phase_2_avg": 1200000
+    },
+    "geographic_distribution": {
+      "California": 287,
+      "Massachusetts": 156,
+      "New York": 134,
+      "Texas": 98,
+      "Illinois": 67,
+      "Other": 505
+    },
+    "organization_types": {
+      "For-profit small business": 89,
+      "University partnership": 8,
+      "Research institution": 3
+    },
+    "project_categories": {
+      "Artificial Intelligence/Machine Learning": 342,
+      "Biotechnology": 198,
+      "Advanced Manufacturing": 156,
+      "Clean Energy": 134,
+      "Cybersecurity": 112,
+      "Healthcare IT": 98,
+      "Other": 207
+    },
+    "winning_patterns": {
+      "team_composition": "PhD technical lead + MBA business lead wins 40% more often",
+      "budget_allocation": "Optimal: 60% R&D, 25% personnel, 15% overhead",
+      "proposal_length": "15-20 pages performs best (vs 10-15 or 20-25)",
+      "letters_of_support": "3-5 letters optimal, must include potential customers",
+      "prior_funding": "Teams with prior SBIR/STTR awards win 2.3x more often",
+      "commercialization_plan": "Must show clear path to revenue within 2 years",
+      "intellectual_property": "Provisional patent or trade secret strategy required"
+    },
+    "key_success_phrases": [
+      "scalable technology",
+      "market validation",
+      "customer discovery",
+      "intellectual property protection",
+      "commercialization pathway",
+      "competitive advantage",
+      "total addressable market",
+      "go-to-market strategy"
+    ],
+    "red_flags": [
+      "Vague commercialization plan",
+      "No customer discovery evidence",
+      "Unrealistic timeline (less than 6 months for Phase I)",
+      "Budget doesn't align with work plan",
+      "No IP strategy mentioned",
+      "Team lacks business expertise",
+      "No letters from potential customers",
+      "Overly academic language"
+    ],
+    "reviewer_priorities": {
+      "intellectual_merit": 40,
+      "broader_impacts": 30,
+      "commercialization_potential": 30
+    },
+    "optimal_timing": {
+      "best_months_to_apply": ["March", "September"],
+      "avoid_months": ["December", "July"],
+      "average_review_time_days": 90,
+      "award_announcement_months": ["June", "December"]
+    },
+    "competitive_analysis": {
+      "your_advantages": [
+        "AI + workforce development is trending (342 AI awards in 2020-2024)",
+        "Illinois location is underrepresented (only 67 awards vs CA's 287)",
+        "Business-in-a-box model is novel approach",
+        "Addresses national priority (displaced workers)"
+      ],
+      "areas_to_strengthen": [
+        "Need strong technical team credentials",
+        "Must demonstrate customer discovery",
+        "Require clear IP strategy",
+        "Need letters from potential customers"
+      ]
+    }
+  }
+}
