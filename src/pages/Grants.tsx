@@ -1,14 +1,14 @@
 import { useState, useEffect, FormEvent } from 'react'
 import {
   Search, SlidersHorizontal, X, Wifi, WifiOff,
-  ChevronLeft, ChevronRight, ExternalLink, Building2,
+  ChevronLeft, ChevronRight, ExternalLink, Building2, Sparkles, Loader,
 } from 'lucide-react'
 import Layout from '../components/Layout'
 import GrantCard from '../components/GrantCard'
 import GrantorAnalysisModal from '../components/GrantorAnalysisModal'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { searchGrantsLive, upsertLiveGrant, type GrantSearchParams, type LiveSearchResult } from '../lib/grantsApi'
+import { searchGrantsLive, upsertLiveGrant, getAiMatchesForGrants, type GrantSearchParams, type LiveSearchResult } from '../lib/grantsApi'
 import type { Grant, SavedGrant, FoundationResult } from '../types'
 
 // ── Eligibility filters ───────────────────────────────────────────────────────
@@ -151,8 +151,11 @@ export default function Grants() {
   const [showFilters, setShowFilters] = useState(false)
   const [liveResult, setLiveResult]   = useState<LiveSearchResult | null>(null)
   const [isLive, setIsLive]           = useState(true)
-  const [analyzingGrantor, setAnalyzingGrantor] = useState<string | null>(null)
+  const [analyzingGrantor, setAnalyzingGrantor]   = useState<string | null>(null)
   const [pendingTrackGrant, setPendingTrackGrant] = useState<Grant | null>(null)
+  const [aiMatching, setAiMatching]               = useState(false)
+  const [aiError, setAiError]                     = useState('')
+  const [matchScores, setMatchScores]             = useState<Map<string, { score: number; reasoning: string; key_strengths: string[]; gaps: string[] }>>(new Map())
 
   const [params, setParams] = useState<GrantSearchParams>({
     keyword: '', eligibility: 'all', page: 1, limit: 25,
@@ -229,7 +232,25 @@ export default function Grants() {
   }
 
   function handleSearch(e: FormEvent) { e.preventDefault(); setParams(p => ({ ...p, page: 1 })) }
-  function clearFilters() { setParams(p => ({ keyword: '', eligibility: p.eligibility, page: 1, limit: 25 })) }
+  function clearFilters() { setParams(p => ({ keyword: '', eligibility: p.eligibility, page: 1, limit: 25 })); setMatchScores(new Map()) }
+
+  async function runAiMatching() {
+    if (!profile || !grants.length) return
+    setAiMatching(true)
+    setAiError('')
+    try {
+      const scores = await getAiMatchesForGrants(
+        profile as unknown as Record<string, unknown>,
+        grants,
+      )
+      setMatchScores(scores)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'AI matching failed'
+      setAiError(msg.includes('ANTHROPIC_API_KEY') ? 'Add ANTHROPIC_API_KEY to Supabase secrets to enable AI matching.' : msg)
+    } finally {
+      setAiMatching(false)
+    }
+  }
 
   const savedIds   = new Set(savedGrants.map(s => s.grant_id))
   const hasFilter  = !!(params.keyword)
@@ -270,9 +291,22 @@ export default function Grants() {
               )}
             </div>
           </div>
-          <button className="btn-secondary text-xs shrink-0" onClick={() => setShowFilters(!showFilters)}>
-            <SlidersHorizontal size={13} /> Filters
-          </button>
+          <div className="flex items-center gap-2">
+            {scope === 'federal' && grants.length > 0 && profile?.description && (
+              <button
+                onClick={runAiMatching}
+                disabled={aiMatching}
+                className="btn-secondary text-xs border-gold-300 text-gold-700 hover:bg-gold-50"
+                title="Score current results against your profile using Claude AI"
+              >
+                {aiMatching ? <Loader size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                {aiMatching ? 'Scoring...' : matchScores.size > 0 ? 'Re-score with AI' : 'AI Match Score'}
+              </button>
+            )}
+            <button className="btn-secondary text-xs shrink-0" onClick={() => setShowFilters(!showFilters)}>
+              <SlidersHorizontal size={13} /> Filters
+            </button>
+          </div>
         </div>
 
         {/* Scope tabs */}
@@ -359,6 +393,29 @@ export default function Grants() {
           </div>
         )}
 
+        {/* AI error */}
+        {aiError && (
+          <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-2">
+            <Sparkles size={14} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="font-sans text-xs text-amber-800">{aiError}</p>
+          </div>
+        )}
+
+        {/* AI score legend when scores are present */}
+        {matchScores.size > 0 && !aiMatching && (
+          <div className="mb-4 flex items-center gap-4 px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <span className="flex items-center gap-1.5 font-sans text-xs text-slate-600">
+              <Sparkles size={12} className="text-gold-500" />
+              AI match scores active ({matchScores.size} grants scored)
+            </span>
+            <div className="flex items-center gap-3 ml-auto font-mono text-[11px]">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-teal-100 border-2 border-teal-400 inline-block" /> 80+</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-amber-100 border-2 border-amber-400 inline-block" /> 60–79</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-slate-100 border-2 border-slate-300 inline-block" /> &lt;60</span>
+            </div>
+          </div>
+        )}
+
         {/* Foundation note */}
         {scope === 'foundation' && (
           <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 mb-4">
@@ -404,15 +461,26 @@ export default function Grants() {
               {hasFilter && <button onClick={clearFilters} className="btn-ghost text-xs text-slate-500"><X size={11} /> Clear</button>}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {grants.map(grant => (
-                <GrantCard
-                  key={grant.id} grant={grant} isLive={isLive}
-                  isSaved={savedIds.has(grant.id)}
-                  onSave={handleSave} onUnsave={handleUnsave}
-                  onAnalyzeGrantor={setAnalyzingGrantor}
-                  onTrackApplication={setPendingTrackGrant}
-                />
-              ))}
+              {grants
+                .slice()
+                .sort((a, b) => {
+                  if (!matchScores.size) return 0
+                  return (matchScores.get(b.id)?.score ?? -1) - (matchScores.get(a.id)?.score ?? -1)
+                })
+                .map(grant => {
+                  const aiMatch = matchScores.get(grant.id)
+                  return (
+                    <GrantCard
+                      key={grant.id} grant={grant} isLive={isLive}
+                      isSaved={savedIds.has(grant.id)}
+                      matchScore={aiMatch?.score}
+                      matchReasoning={aiMatch?.reasoning}
+                      onSave={handleSave} onUnsave={handleUnsave}
+                      onAnalyzeGrantor={setAnalyzingGrantor}
+                      onTrackApplication={setPendingTrackGrant}
+                    />
+                  )
+                })}
             </div>
 
             {/* Pagination */}

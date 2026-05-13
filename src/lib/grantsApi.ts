@@ -118,6 +118,32 @@ export async function syncGrantsFromGovApi(keyword: string): Promise<number> {
   return data?.synced ?? 0
 }
 
+// ── AI matching against any grant array (live or DB) ─────────────────────────
+export async function getAiMatchesForGrants(
+  profile: Record<string, unknown>,
+  grants:  Grant[],
+): Promise<Map<string, { score: number; reasoning: string; key_strengths: string[]; gaps: string[] }>> {
+  const { data: { session } } = await supabase.auth.getSession()
+  const res = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/match-grants`,
+    {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ profile, grants }),
+    }
+  )
+  const data = await res.json()
+  if (data.error) throw new Error(data.error)
+  const map = new Map<string, { score: number; reasoning: string; key_strengths: string[]; gaps: string[] }>()
+  for (const m of (data.matches ?? [])) {
+    map.set(m.grant_id, { score: m.score, reasoning: m.reasoning, key_strengths: m.key_strengths ?? [], gaps: m.gaps ?? [] })
+  }
+  return map
+}
+
 // ── AI matching (Phase 3 — requires deployed match-grants function) ────────────
 export async function getAiMatches(
   profileId: string
