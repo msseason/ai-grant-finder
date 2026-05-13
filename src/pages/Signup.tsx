@@ -5,19 +5,19 @@ import { supabase } from '../lib/supabase'
 
 export default function Signup() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [showPw, setShowPw]     = useState(false)
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [sent, setSent]         = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     if (password !== confirmPw) { setError('Passwords do not match.'); return }
-    if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
+    if (password.length < 8)   { setError('Password must be at least 8 characters.'); return }
     setLoading(true)
 
     const { error } = await supabase.auth.signUp({
@@ -36,16 +36,16 @@ export default function Signup() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50">
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-gold-500/10 border border-gold-500/20 flex items-center justify-center mx-auto mb-6">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gold-400">
+          <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto mb-6">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-600">
               <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 className="font-display text-2xl font-semibold text-slate-100 mb-3">Check your email</h2>
-          <p className="font-sans text-sm text-slate-400 leading-relaxed">
-            We've sent a confirmation link to <span className="text-gold-400">{email}</span>.
+          <h2 className="font-display text-2xl font-semibold text-slate-900 mb-3">Check your email</h2>
+          <p className="font-sans text-sm text-slate-600 leading-relaxed">
+            We've sent a confirmation link to <span className="text-gold-600 font-medium">{email}</span>.
             Click it to activate your account, then set up your organization profile.
           </p>
           <Link to="/login" className="btn-secondary mt-8 mx-auto w-fit">
@@ -58,8 +58,8 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] bg-navy-800 border-r border-navy-700 p-10 shrink-0">
+      {/* Left panel — intentionally dark for contrast */}
+      <div className="hidden lg:flex flex-col justify-between w-[420px] bg-navy-900 border-r border-navy-700 p-10 shrink-0">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -67,7 +67,7 @@ export default function Signup() {
               <path d="M4.5 8.5 L11.5 8.5" stroke="#06091A" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <span className="font-display text-lg font-semibold text-slate-100">Grant<span className="text-gold-400">Finder</span></span>
+          <span className="font-display text-lg font-semibold text-white">Grant<span className="text-gold-400">Finder</span></span>
         </Link>
 
         <div className="space-y-6">
@@ -75,35 +75,35 @@ export default function Signup() {
             <p className="font-mono text-xs text-gold-500 uppercase tracking-widest mb-3">What you get</p>
             <div className="space-y-4">
               {[
-                { label: 'Live federal & state grants', sub: 'Synced from Grants.gov, SBIR, and more' },
-                { label: 'AI matching for any sector', sub: 'Nonprofits, startups, farms, clinics, studios...' },
-                { label: 'Grantor analysis engine', sub: 'Past awards, winning patterns, red flags' },
-                { label: 'Application portfolio', sub: 'Track every grant from search to award' },
+                { label: 'Live federal & state grants',   sub: 'Synced from Grants.gov, SBIR, and more' },
+                { label: 'AI matching for any sector',    sub: 'Nonprofits, startups, farms, clinics, studios...' },
+                { label: 'Grantor analysis engine',       sub: 'Past awards, winning patterns, red flags' },
+                { label: 'Application portfolio',         sub: 'Track every grant from search to award' },
               ].map(({ label, sub }) => (
                 <div key={label} className="flex gap-3">
                   <div className="w-5 h-5 rounded-full bg-gold-500/20 border border-gold-500/30 flex items-center justify-center shrink-0 mt-0.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-gold-400" />
                   </div>
                   <div>
-                    <p className="font-sans text-sm font-medium text-slate-200">{label}</p>
-                    <p className="font-sans text-xs text-slate-500">{sub}</p>
+                    <p className="font-sans text-sm font-medium text-white">{label}</p>
+                    <p className="font-sans text-xs text-slate-400">{sub}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="px-4 py-3 rounded-lg bg-teal-500/5 border border-teal-500/15">
-            <p className="font-sans text-xs text-teal-300/80">
+          <div className="px-4 py-3 rounded-lg bg-teal-500/10 border border-teal-500/20">
+            <p className="font-sans text-xs text-teal-300">
               No credit card required. Free to start. Any organization type welcome.
             </p>
           </div>
         </div>
 
-        <p className="font-sans text-xs text-slate-600">© {new Date().getFullYear()} AI Grant Finder</p>
+        <p className="font-sans text-xs text-slate-500">© {new Date().getFullYear()} AI Grant Finder</p>
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-slate-50">
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
@@ -113,9 +113,9 @@ export default function Signup() {
                   <path d="M4.5 8.5 L11.5 8.5" stroke="#06091A" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </div>
-              <span className="font-display text-base font-semibold text-slate-100">Grant<span className="text-gold-400">Finder</span></span>
+              <span className="font-display text-base font-semibold text-slate-900">Grant<span className="text-gold-600">Finder</span></span>
             </Link>
-            <h1 className="font-display text-3xl font-semibold text-slate-100 tracking-tight">Create your account</h1>
+            <h1 className="font-display text-3xl font-semibold text-slate-900 tracking-tight">Create your account</h1>
             <p className="font-sans text-sm text-slate-500 mt-2">Start finding grants in minutes</p>
           </div>
 
@@ -148,7 +148,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -169,8 +169,8 @@ export default function Signup() {
             </div>
 
             {error && (
-              <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="font-sans text-sm text-red-400">{error}</p>
+              <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="font-sans text-sm text-red-600">{error}</p>
               </div>
             )}
 
@@ -186,7 +186,7 @@ export default function Signup() {
 
           <p className="font-sans text-sm text-slate-500 text-center mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-gold-400 hover:text-gold-300 transition-colors font-medium">
+            <Link to="/login" className="text-gold-600 hover:text-gold-700 transition-colors font-medium">
               Sign in
             </Link>
           </p>

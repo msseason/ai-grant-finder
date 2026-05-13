@@ -17,7 +17,7 @@ interface IndustryTagInputProps {
 }
 
 export default function IndustryTagInput({ value, onChange, placeholder }: IndustryTagInputProps) {
-  const [input, setInput] = useState('')
+  const [input, setInput]               = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -27,9 +27,7 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
 
   function addTag(tag: string) {
     const clean = tag.trim()
-    if (clean && !value.includes(clean)) {
-      onChange([...value, clean])
-    }
+    if (clean && !value.includes(clean)) onChange([...value, clean])
     setInput('')
     setShowSuggestions(false)
     inputRef.current?.focus()
@@ -53,23 +51,23 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
     <div className="relative">
       {/* Tag container */}
       <div
-        className="min-h-[42px] w-full px-3 py-2 bg-navy-700 border border-navy-500 rounded-lg
+        className="min-h-[42px] w-full px-3 py-2 bg-white border border-slate-200 rounded-lg
           flex flex-wrap gap-1.5 cursor-text transition-all duration-200
-          hover:border-navy-400
-          focus-within:border-gold-500 focus-within:ring-1 focus-within:ring-gold-500/30"
+          hover:border-slate-300
+          focus-within:border-navy-600 focus-within:ring-1 focus-within:ring-navy-600/15"
         onClick={() => inputRef.current?.focus()}
       >
         {value.map((tag) => (
           <span
             key={tag}
             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-sans font-medium
-              bg-gold-500/15 text-gold-300 border border-gold-500/25"
+              bg-gold-50 text-gold-700 border border-gold-200"
           >
             {tag}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); removeTag(tag) }}
-              className="text-gold-400/60 hover:text-gold-300 transition-colors focus:outline-none"
+              className="text-gold-500 hover:text-gold-700 transition-colors focus:outline-none"
             >
               <X size={11} />
             </button>
@@ -84,14 +82,14 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
           placeholder={value.length === 0 ? (placeholder ?? 'Type a sector and press Enter...') : ''}
-          className="flex-1 min-w-[140px] bg-transparent text-sm text-slate-100 placeholder:text-slate-500 outline-none"
+          className="flex-1 min-w-[140px] bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none"
         />
       </div>
 
       {/* Suggestions dropdown */}
-      {showSuggestions && (input.length > 0 ? filtered.length > 0 : SUGGESTED_TAGS.filter(t => !value.includes(t)).length > 0) && (
+      {showSuggestions && (input.length > 0 ? (filtered.length > 0 || !SUGGESTED_TAGS.some(t => t.toLowerCase() === input.toLowerCase())) : SUGGESTED_TAGS.filter(t => !value.includes(t)).length > 0) && (
         <div className="absolute top-full left-0 right-0 mt-1 py-1 card-elevated z-20 max-h-48 overflow-y-auto">
-          <p className="px-3 py-1 font-mono text-[10px] text-slate-500 uppercase tracking-wider">
+          <p className="px-3 py-1 font-mono text-[10px] text-slate-400 uppercase tracking-wider">
             {input ? 'Suggestions' : 'Common sectors'}
           </p>
           {(input ? filtered : SUGGESTED_TAGS.filter(t => !value.includes(t)).slice(0, 10)).map((tag) => (
@@ -99,10 +97,10 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
               key={tag}
               type="button"
               onMouseDown={() => addTag(tag)}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm font-sans text-slate-300
-                hover:bg-navy-600 hover:text-slate-100 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm font-sans text-slate-700
+                hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
             >
-              <Plus size={12} className="text-slate-500" />
+              <Plus size={12} className="text-slate-400" />
               {tag}
             </button>
           ))}
@@ -110,8 +108,8 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
             <button
               type="button"
               onMouseDown={() => addTag(input)}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm font-sans text-gold-400
-                hover:bg-navy-600 transition-colors text-left border-t border-navy-600 mt-1 pt-2"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm font-sans text-gold-600
+                hover:bg-gold-50 transition-colors text-left border-t border-slate-100 mt-1 pt-2"
             >
               <Plus size={12} />
               Add "{input}"
@@ -120,7 +118,7 @@ export default function IndustryTagInput({ value, onChange, placeholder }: Indus
         </div>
       )}
 
-      <p className="mt-1.5 font-sans text-[11px] text-slate-500">
+      <p className="mt-1.5 font-sans text-[11px] text-slate-400">
         Press Enter or comma to add. Any sector welcome — not limited to a preset list.
       </p>
     </div>

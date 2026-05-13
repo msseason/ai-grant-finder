@@ -1,13 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Search, FileText, User, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Search, FileText, User, LogOut, Menu, X, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
 const navLinks = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/grants', label: 'Find Grants', icon: Search },
+  { to: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { to: '/grants',       label: 'Find Grants',  icon: Search },
+  { to: '/calendar',     label: 'Calendar',     icon: Calendar },
   { to: '/applications', label: 'Applications', icon: FileText },
-  { to: '/profile', label: 'Profile', icon: User },
+  { to: '/profile',      label: 'Profile',      icon: User },
 ]
 
 export default function Navbar() {
@@ -22,7 +23,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-navy-700/60 bg-navy-900/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -33,8 +34,8 @@ export default function Navbar() {
                 <path d="M4.5 8.5 L11.5 8.5" stroke="#06091A" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </div>
-            <span className="font-display text-lg font-semibold text-slate-100 tracking-tight">
-              Grant<span className="text-gold-400">Finder</span>
+            <span className="font-display text-lg font-semibold text-slate-900 tracking-tight">
+              Grant<span className="text-gold-600">Finder</span>
             </span>
           </Link>
 
@@ -47,8 +48,8 @@ export default function Navbar() {
                   to={to}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-sans font-medium transition-all duration-150
                     ${location.pathname === to
-                      ? 'bg-navy-700 text-gold-400'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-navy-800'
+                      ? 'bg-navy-900 text-white'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                 >
                   <Icon size={15} />
@@ -63,24 +64,24 @@ export default function Navbar() {
             {user ? (
               <>
                 <div className="hidden md:flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gold-500/20 border border-gold-500/30 flex items-center justify-center">
-                    <span className="font-mono text-xs text-gold-400 font-semibold">
+                  <div className="w-7 h-7 rounded-full bg-gold-100 border border-gold-300 flex items-center justify-center">
+                    <span className="font-mono text-xs text-gold-700 font-semibold">
                       {(profile?.org_name ?? user.email ?? 'U')[0].toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-sm font-sans text-slate-400 max-w-[140px] truncate">
+                  <span className="text-sm font-sans text-slate-600 max-w-[140px] truncate">
                     {profile?.org_name ?? user.email}
                   </span>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="hidden md:flex btn-ghost text-slate-500 hover:text-red-400 text-xs px-3 py-1.5"
+                  className="hidden md:flex btn-ghost text-slate-500 hover:text-red-500 text-xs px-3 py-1.5"
                 >
                   <LogOut size={14} />
                   Sign out
                 </button>
                 <button
-                  className="md:hidden p-2 text-slate-400 hover:text-slate-100"
+                  className="md:hidden p-2 text-slate-600 hover:text-slate-900"
                   onClick={() => setMenuOpen(!menuOpen)}
                 >
                   {menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -98,7 +99,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {user && menuOpen && (
-        <div className="md:hidden border-t border-navy-700 bg-navy-900 px-4 pb-4 pt-2">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pb-4 pt-2">
           {navLinks.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
@@ -106,8 +107,8 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-sans mb-1 transition-all duration-150
                 ${location.pathname === to
-                  ? 'bg-navy-700 text-gold-400'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-navy-800'
+                  ? 'bg-navy-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
             >
               <Icon size={16} />
@@ -116,7 +117,7 @@ export default function Navbar() {
           ))}
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 px-3 py-2.5 w-full text-left text-sm font-sans text-slate-500 hover:text-red-400 mt-2"
+            className="flex items-center gap-2 px-3 py-2.5 w-full text-left text-sm font-sans text-slate-500 hover:text-red-500 mt-2"
           >
             <LogOut size={16} />
             Sign out

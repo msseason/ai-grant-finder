@@ -5,10 +5,10 @@ import { supabase } from '../lib/supabase'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [error, setError] = useState('')
+  const [showPw, setShowPw]   = useState(false)
+  const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
@@ -26,8 +26,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] bg-navy-800 border-r border-navy-700 p-10 shrink-0">
+      {/* Left panel — intentionally dark for contrast */}
+      <div className="hidden lg:flex flex-col justify-between w-[420px] bg-navy-900 border-r border-navy-700 p-10 shrink-0">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -35,14 +35,14 @@ export default function Login() {
               <path d="M4.5 8.5 L11.5 8.5" stroke="#06091A" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <span className="font-display text-lg font-semibold text-slate-100">Grant<span className="text-gold-400">Finder</span></span>
+          <span className="font-display text-lg font-semibold text-white">Grant<span className="text-gold-400">Finder</span></span>
         </Link>
 
         <div>
-          <p className="font-display text-3xl font-semibold text-slate-100 leading-snug tracking-tight mb-4 italic">
+          <p className="font-display text-3xl font-semibold text-white leading-snug tracking-tight mb-4 italic">
             "Average success rate without analysis: 10–15%. With grantor intelligence: 50–60%."
           </p>
-          <p className="font-sans text-sm text-slate-500">— Built on 10 years of grant expertise</p>
+          <p className="font-sans text-sm text-slate-400">— Built on 10 years of grant expertise</p>
         </div>
 
         <div className="space-y-3">
@@ -57,8 +57,8 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right panel - form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-slate-50">
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
@@ -68,9 +68,9 @@ export default function Login() {
                   <path d="M4.5 8.5 L11.5 8.5" stroke="#06091A" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </div>
-              <span className="font-display text-base font-semibold text-slate-100">Grant<span className="text-gold-400">Finder</span></span>
+              <span className="font-display text-base font-semibold text-slate-900">Grant<span className="text-gold-600">Finder</span></span>
             </Link>
-            <h1 className="font-display text-3xl font-semibold text-slate-100 tracking-tight">Welcome back</h1>
+            <h1 className="font-display text-3xl font-semibold text-slate-900 tracking-tight">Welcome back</h1>
             <p className="font-sans text-sm text-slate-500 mt-2">Sign in to your account</p>
           </div>
 
@@ -103,7 +103,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -111,8 +111,8 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="font-sans text-sm text-red-400">{error}</p>
+              <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="font-sans text-sm text-red-600">{error}</p>
               </div>
             )}
 
@@ -128,7 +128,7 @@ export default function Login() {
 
           <p className="font-sans text-sm text-slate-500 text-center mt-6">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-gold-400 hover:text-gold-300 transition-colors font-medium">
+            <Link to="/signup" className="text-gold-600 hover:text-gold-700 transition-colors font-medium">
               Get started free
             </Link>
           </p>

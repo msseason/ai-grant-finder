@@ -12,15 +12,15 @@
   }
 
   body {
-    @apply bg-navy-900 text-slate-100 font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
     background-image:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201, 162, 68, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(20, 184, 166, 0.04) 0%, transparent 60%);
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201, 162, 68, 0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(20, 184, 166, 0.04) 0%, transparent 60%);
     background-attachment: fixed;
   }
 
   ::selection {
-    @apply bg-gold-500/30 text-gold-200;
+    @apply bg-gold-500/25 text-gold-700;
   }
 
   ::-webkit-scrollbar {
@@ -28,15 +28,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-navy-800;
+    @apply bg-slate-100;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-navy-500 rounded-full;
+    @apply bg-slate-300 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gold-600;
+    @apply bg-gold-500;
   }
 }
 
@@ -45,63 +45,63 @@
     @apply inline-flex items-center gap-2 px-5 py-2.5 bg-gold-500 text-navy-950 font-sans font-semibold text-sm rounded-lg
     transition-transform transition-shadow duration-200
     hover:bg-gold-400 hover:shadow-gold-md hover:-translate-y-px
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white
     active:translate-y-0 active:shadow-none
     disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-navy-700 text-slate-100 font-sans font-medium text-sm rounded-lg border border-navy-500
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 font-sans font-medium text-sm rounded-lg border border-slate-200
     transition-all duration-200
-    hover:bg-navy-600 hover:border-navy-400
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900
-    active:bg-navy-800
+    hover:bg-slate-50 hover:border-slate-300
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white
+    active:bg-slate-100
     disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-4 py-2 text-slate-400 font-sans font-medium text-sm rounded-lg
+    @apply inline-flex items-center gap-2 px-4 py-2 text-slate-600 font-sans font-medium text-sm rounded-lg
     transition-all duration-200
-    hover:text-slate-100 hover:bg-navy-700
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400
-    active:bg-navy-800;
+    hover:text-slate-900 hover:bg-slate-100
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
+    active:bg-slate-200;
   }
 
   .card {
-    @apply bg-navy-800 border border-navy-600/50 rounded-xl shadow-navy-md backdrop-blur-sm;
+    @apply bg-white border border-slate-200 rounded-xl shadow-card;
   }
 
   .card-elevated {
-    @apply bg-navy-700 border border-navy-500/50 rounded-xl shadow-navy-lg;
+    @apply bg-white border border-slate-200 rounded-xl shadow-card-md;
   }
 
   .input {
-    @apply w-full px-4 py-2.5 bg-navy-700 border border-navy-500 rounded-lg text-slate-100 text-sm font-sans
-    placeholder:text-slate-500
+    @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm font-sans
+    placeholder:text-slate-400
     transition-all duration-200
-    hover:border-navy-400
-    focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30
+    hover:border-slate-300
+    focus:outline-none focus:border-navy-600 focus:ring-1 focus:ring-navy-600/15
     disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .label {
-    @apply block text-xs font-sans font-medium text-slate-400 mb-1.5 tracking-wide uppercase;
+    @apply block text-xs font-sans font-medium text-slate-500 mb-1.5 tracking-wide uppercase;
   }
 
   .badge-federal {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-gold-500/15 text-gold-300 border border-gold-500/20;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-amber-50 text-amber-700 border border-amber-200;
   }
 
   .badge-state {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-teal-500/15 text-teal-300 border border-teal-500/20;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-teal-50 text-teal-700 border border-teal-200;
   }
 
   .badge-foundation {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-slate-500/15 text-slate-300 border border-slate-500/20;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200;
   }
 
   .badge-corporate {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-navy-500/60 text-slate-300 border border-navy-400/30;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-navy-50 text-navy-600 border border-navy-100;
   }
 
   .score-ring {
@@ -109,15 +109,15 @@
   }
 
   .stat-value {
-    @apply font-mono text-2xl font-semibold text-slate-100 tracking-tight;
+    @apply font-mono text-2xl font-semibold text-slate-900 tracking-tight;
   }
 
   .stat-label {
-    @apply font-sans text-xs text-slate-400 mt-0.5;
+    @apply font-sans text-xs text-slate-500 mt-0.5;
   }
 
   .section-heading {
-    @apply font-display text-2xl font-semibold text-slate-100 tracking-tight;
+    @apply font-display text-2xl font-semibold text-slate-900 tracking-tight;
   }
 
   .animate-stagger-1 { animation-delay: 0.05s; }
