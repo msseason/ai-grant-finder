@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pre-commit: unit + component tests must pass before any commit lands.
+# E2E/UAT run via CI (npm run test:e2e) — not here, to avoid blocking
+# fast local commits on live network calls.
+
+echo "⚡ Running unit & component tests..."
+npm test
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Tests failed. Commit blocked."
+  echo "   Fix all failures before committing — never weaken tests just to pass."
+  echo "   Run 'npm test' for full output."
+  exit 1
+fi
+
+echo "✅ All 145+ tests passed. Proceeding with commit."

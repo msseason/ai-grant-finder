@@ -9,7 +9,16 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:regression": "playwright test e2e/07-regression.spec.ts",
+    "test:e2e:uat": "playwright test e2e/01-public-pages.spec.ts e2e/02-auth-flow.spec.ts e2e/03-grants-uat.spec.ts e2e/04-calendar-uat.spec.ts e2e/05-profile-uat.spec.ts e2e/06-applications-uat.spec.ts",
+    "test:all": "vitest run && playwright test",
+    "test:ci": "vitest run && playwright test --reporter=github",
+    "precommit": "vitest run",
+    "prepare": "husky"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -19,6 +28,7 @@
     "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -27,7 +37,9 @@
     "@vitejs/plugin-react": "^4.3.3",
     "@vitest/ui": "^4.1.6",
     "autoprefixer": "^10.4.20",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "playwright": "^1.60.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",

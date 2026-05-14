@@ -63,9 +63,18 @@ export async function searchGrants(
 async function searchGrantsDb(params: GrantSearchParams): Promise<Grant[]> {
   let q = supabase.from('grants').select('*').order('created_at', { ascending: false })
   if (params.keyword) {
-    q = q.or(
-      `title.ilike.%${params.keyword}%,eligibility.ilike.%${params.keyword}%,provider.ilike.%${params.keyword}%`
-    )
+    // Sanitize keyword: strip characters that could manipulate the PostgREST filter string
+    // Commas and parentheses are filter delimiters; percent signs are ilike wildcards
+    const safeKeyword = params.keyword
+      .replace(/[,()'"`]/g, '')   // remove PostgREST filter delimiters and quotes
+      .replace(/%/g, '')           // remove user-supplied wildcards (we add our own)
+      .trim()
+      .slice(0, 200)
+    if (safeKeyword) {
+      q = q.or(
+        `title.ilike.%${safeKeyword}%,eligibility.ilike.%${safeKeyword}%,provider.ilike.%${safeKeyword}%`
+      )
+    }
   }
   if (params.type) q = q.eq('type', params.type)
   const lim    = params.limit ?? 25
@@ -124,17 +133,25 @@ export async function getAiMatchesForGrants(
   grants:  Grant[],
 ): Promise<Map<string, { score: number; reasoning: string; key_strengths: string[]; gaps: string[] }>> {
   const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) {
+    throw new Error('Not authenticated — please sign in again')
+  }
   const res = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/match-grants`,
     {
       method:  'POST',
       headers: {
         'Content-Type':  'application/json',
-        'Authorization': `Bearer ${session?.access_token}`,
+        'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ profile, grants }),
     }
   )
+  if (!res.ok) {
+    let txt = res.statusText
+    try { txt = await res.text() } catch { /* response may lack text() in test environments */ }
+    throw new Error(`match-grants ${res.status}: ${txt}`)
+  }
   const data = await res.json()
   if (data.error) throw new Error(data.error)
   const map = new Map<string, { score: number; reasoning: string; key_strengths: string[]; gaps: string[] }>()

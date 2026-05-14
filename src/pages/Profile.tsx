@@ -312,6 +312,17 @@ export default function Profile() {
     }
   }
 
+  function validateWebsite(url: string | null | undefined): string | null {
+    if (!url) return null
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
+      return url
+    } catch {
+      return null
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!user) return
@@ -324,7 +335,7 @@ export default function Profile() {
       description: form.description || null, mission: form.mission || null,
       industries: form.industries ?? [], location_state: form.location_state || null,
       location_city: form.location_city || null, annual_budget: form.annual_budget ?? null,
-      employee_count: form.employee_count ?? null, website: form.website || null,
+      employee_count: form.employee_count ?? null, website: validateWebsite(form.website),
       ein: form.ein || null, founded_year: form.founded_year ?? null,
       updated_at: new Date().toISOString(),
     }
@@ -420,8 +431,10 @@ export default function Profile() {
               </div>
 
               <div>
-                <label className="label">Year Founded</label>
-                <input type="number"
+                <label className="label" htmlFor="founded-year">Year Founded</label>
+                <input
+                  id="founded-year"
+                  type="number"
                   value={form.founded_year ?? ''}
                   onChange={(e) => setForm((f) => ({ ...f, founded_year: e.target.value ? Number(e.target.value) : null }))}
                   className="input" placeholder={`e.g. ${currentYear - 3}`}

@@ -41,6 +41,11 @@ export function useAuth() {
   }
 
   async function signOut() {
+    // Clear local state first, then sign out from Supabase
+    // onAuthStateChange will also fire and clear state, but being explicit is safer
+    setUser(null)
+    setSession(null)
+    setProfile(null)
     await supabase.auth.signOut()
   }
 

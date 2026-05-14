@@ -3,6 +3,17 @@ import {
   Search, SlidersHorizontal, X, Wifi, WifiOff,
   ChevronLeft, ChevronRight, ExternalLink, Building2, Sparkles, Loader,
 } from 'lucide-react'
+
+/** Only allow http/https URLs to prevent javascript: URI injection */
+function isSafeUrl(url: string | null | undefined): url is string {
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
 import Layout from '../components/Layout'
 import GrantCard from '../components/GrantCard'
 import GrantorAnalysisModal from '../components/GrantorAnalysisModal'
@@ -124,10 +135,12 @@ function FoundationCard({ f }: { f: FoundationResult }) {
         )}
       </div>
       <div className="flex gap-2 pt-1 border-t border-slate-100 mt-auto">
-        <a href={f.profileUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-xs px-3 py-1.5">
-          <ExternalLink size={12} /> View 990 History
-        </a>
-        {f.website && (
+        {isSafeUrl(f.profileUrl) && (
+          <a href={f.profileUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-xs px-3 py-1.5">
+            <ExternalLink size={12} /> View 990 History
+          </a>
+        )}
+        {isSafeUrl(f.website) && (
           <a href={f.website} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs px-3 py-1.5">
             Website
           </a>

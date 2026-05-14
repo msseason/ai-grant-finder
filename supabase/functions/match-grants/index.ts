@@ -16,6 +16,29 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // ── JWT authentication required ────────────────────────────────────────────
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ error: 'Missing or invalid Authorization header' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  const jwt = authHeader.slice(7)
+
+  // Verify JWT with the anon client (no service role key needed for verification)
+  const supabaseAnon = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!
+  )
+  const { data: { user }, error: authError } = await supabaseAnon.auth.getUser(jwt)
+  if (authError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid or expired token' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
   if (!anthropicKey) {
     return new Response(
@@ -24,13 +47,14 @@ serve(async (req) => {
     )
   }
 
+  // Use service role only for DB queries (grants table read)
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
   const body = await req.json()
-  const { profile, grantIds } = body
+  const { profile, grantIds, grants: inlineGrants } = body
 
   if (!profile) {
     return new Response(
@@ -39,12 +63,29 @@ serve(async (req) => {
     )
   }
 
-  // Fetch grants to analyze
-  let query = supabase.from('grants').select('*').limit(30)
-  if (grantIds?.length) {
-    query = query.in('id', grantIds)
+  // Fetch grants to analyze (prefer inline grants passed from client to avoid extra DB round-trip)
+  let grants: Record<string, unknown>[] | null = null
+  if (Array.isArray(inlineGrants) && inlineGrants.length > 0) {
+    // Sanitize: strip any fields we don't need and cap at 30
+    grants = inlineGrants.slice(0, 30).map((g: Record<string, unknown>) => ({
+      id: String(g.id ?? ''),
+      title: String(g.title ?? ''),
+      provider: g.provider != null ? String(g.provider) : null,
+      type: g.type != null ? String(g.type) : null,
+      amount_min: typeof g.amount_min === 'number' ? g.amount_min : null,
+      amount_max: typeof g.amount_max === 'number' ? g.amount_max : null,
+      categories: Array.isArray(g.categories) ? g.categories.map(String) : [],
+      eligibility: g.eligibility != null ? String(g.eligibility) : null,
+      description: g.description != null ? String(g.description).slice(0, 250) : null,
+    }))
+  } else {
+    let query = supabase.from('grants').select('*').limit(30)
+    if (Array.isArray(grantIds) && grantIds.length > 0) {
+      query = query.in('id', grantIds)
+    }
+    const { data } = await query
+    grants = data ?? []
   }
-  const { data: grants } = await query
 
   if (!grants?.length) {
     return new Response(
@@ -53,28 +94,50 @@ serve(async (req) => {
     )
   }
 
+  // Sanitize profile fields to prevent prompt injection — strip/truncate everything
+  function sanitize(val: unknown, maxLen = 300): string {
+    if (val == null) return ''
+    return String(val).replace(/[<>{}\\]/g, '').slice(0, maxLen)
+  }
+  function sanitizeArray(val: unknown, maxItems = 20, maxEach = 60): string {
+    if (!Array.isArray(val)) return ''
+    return val.slice(0, maxItems).map(v => sanitize(v, maxEach)).join(', ')
+  }
+
+  const safeProfile = {
+    org_name:       sanitize(profile.org_name),
+    org_type:       sanitize(profile.org_type, 60),
+    industries:     sanitizeArray(profile.industries),
+    location_city:  sanitize(profile.location_city, 100),
+    location_state: sanitize(profile.location_state, 100),
+    description:    sanitize(profile.description, 1000),
+    mission:        sanitize(profile.mission, 500),
+    annual_budget:  typeof profile.annual_budget === 'number' ? profile.annual_budget : null,
+    employee_count: typeof profile.employee_count === 'number' ? profile.employee_count : null,
+  }
+
   const grantsText = grants.map((g: Record<string, unknown>) =>
-    `ID: ${g.id}
-Title: ${g.title}
-Provider: ${g.provider ?? 'Unknown'}
-Type: ${g.type ?? 'Unknown'}
+    `ID: ${sanitize(g.id, 100)}
+Title: ${sanitize(g.title)}
+Provider: ${sanitize(g.provider) || 'Unknown'}
+Type: ${sanitize(g.type, 60) || 'Unknown'}
 Amount: $${g.amount_min ?? 0} – $${g.amount_max ?? 'varies'}
-Categories: ${(g.categories as string[])?.join(', ') ?? 'General'}
-Eligibility: ${g.eligibility ?? 'Not specified'}
-Description: ${String(g.description ?? '').slice(0, 250)}`
+Categories: ${sanitizeArray(g.categories) || 'General'}
+Eligibility: ${sanitize(g.eligibility) || 'Not specified'}
+Description: ${sanitize(g.description, 250)}`
   ).join('\n---\n')
 
   const prompt = `You are an expert grant consultant with 10 years of experience. Analyze these grants for the following organization:
 
 ORGANIZATION PROFILE:
-Name: ${profile.org_name ?? 'Not specified'}
-Type: ${profile.org_type ?? 'Not specified'}
-Sectors/Industries: ${profile.industries?.join(', ') ?? 'Not specified'}
-Location: ${profile.location_city ?? ''}, ${profile.location_state ?? 'Not specified'}
-Description: ${profile.description ?? 'Not provided'}
-Mission: ${profile.mission ?? 'Not provided'}
-Annual Budget: $${profile.annual_budget?.toLocaleString() ?? 'Unknown'}
-Team Size: ${profile.employee_count ?? 'Unknown'}
+Name: ${safeProfile.org_name || 'Not specified'}
+Type: ${safeProfile.org_type || 'Not specified'}
+Sectors/Industries: ${safeProfile.industries || 'Not specified'}
+Location: ${safeProfile.location_city}, ${safeProfile.location_state || 'Not specified'}
+Description: ${safeProfile.description || 'Not provided'}
+Mission: ${safeProfile.mission || 'Not provided'}
+Annual Budget: $${safeProfile.annual_budget?.toLocaleString() ?? 'Unknown'}
+Team Size: ${safeProfile.employee_count ?? 'Unknown'}
 
 GRANTS TO ANALYZE:
 ${grantsText}

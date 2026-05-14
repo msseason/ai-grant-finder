@@ -15,12 +15,33 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // ── Require authenticated user (service role or valid JWT) ─────────────────
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  const jwt = authHeader.slice(7)
+  const supabaseAnon = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!
+  )
+  const { data: { user }, error: authError } = await supabaseAnon.auth.getUser(jwt)
+  if (authError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid or expired token' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
   const body = await req.json().catch(() => ({}))
-  const keyword: string = body.keyword ?? ''
+  const keyword: string = String(body.keyword ?? '').slice(0, 200)
   const limit: number = Math.min(body.limit ?? 25, 100)
 
   // Grants.gov search API

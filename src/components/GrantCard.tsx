@@ -2,6 +2,17 @@ import { ExternalLink, Bookmark, BookmarkCheck, Clock, Building2, Tag, Wifi, Tre
 import type { Grant } from '../types'
 import { formatAmount, daysUntilDeadline } from '../lib/grantsApi'
 
+/** Only allow http/https URLs to prevent javascript: URI injection */
+function isSafeUrl(url: string | null | undefined): boolean {
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
+
 interface GrantCardProps {
   grant:               Grant
   matchScore?:         number
@@ -147,8 +158,8 @@ export default function GrantCard({
 
       {/* ── Actions ── */}
       <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 mt-auto">
-        {grant.application_url && (
-          <a href={grant.application_url} target="_blank" rel="noopener noreferrer"
+        {isSafeUrl(grant.application_url) && (
+          <a href={grant.application_url!} target="_blank" rel="noopener noreferrer"
             className="btn-primary text-xs px-3.5 py-1.5">
             <ExternalLink size={13} />
             {liveGrant ? 'View on Grants.gov' : 'Apply'}
